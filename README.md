@@ -36,23 +36,26 @@ Complete Blok full-stack application with authentication, admin dashboard, and R
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or pnpm
 
 ### Installation
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    cd frontend && npm install && cd ..
    ```
 
 2. **Set up database:**
+
    ```bash
    cd database && npx tsx migrate.ts && cd ..
    ```
 
 3. **Start development servers:**
+
    ```bash
    npm run dev
    ```
@@ -69,17 +72,20 @@ Complete Blok full-stack application with authentication, admin dashboard, and R
 ## 📜 Available Scripts
 
 ### Backend
+
 - `npm run dev` - Start both backend and frontend in development mode
 - `npm run dev:backend` - Start only the backend server
 - `npm run build` - Build the backend for production
 - `npm start` - Start the production server
 
 ### Frontend
+
 - `npm run dev:frontend` - Start only the frontend development server
 - `npm run build:frontend` - Build the frontend for production
 - `npm run blok:codegen` - Generate TypeScript types from workflows
 
 ### Combined
+
 - `npm run build:all` - Build both backend and frontend
 - `npm run dev` - Start both servers concurrently
 
@@ -110,6 +116,7 @@ NODE_ENV=development
 The project uses SQLite with Drizzle ORM. Database files are stored in the `database/` directory.
 
 To run migrations:
+
 ```bash
 cd database && npx tsx migrate.ts
 ```
@@ -117,6 +124,7 @@ cd database && npx tsx migrate.ts
 ## 🎨 Frontend Development
 
 The frontend is built with:
+
 - **React 19** - Latest React features
 - **TypeScript** - Full type safety
 - **Tailwind CSS v4** - Modern utility-first CSS
@@ -142,6 +150,7 @@ cd frontend && npm run blok:codegen
 ## 🔐 Authentication
 
 The authentication system includes:
+
 - Session-based authentication with JWT
 - Password hashing with bcryptjs
 - Role-based access control (admin/user)
@@ -151,6 +160,7 @@ The authentication system includes:
 ## 📊 Admin Dashboard
 
 Access the admin dashboard at `/admin` (admin credentials required):
+
 - User management (create, update, delete users)
 - System analytics and monitoring
 - Audit logs and security features
