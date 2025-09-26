@@ -1,0 +1,431 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Smooth theme transitions */
+* {
+  transition: 
+    background-color 0.3s ease-in-out,
+    border-color 0.3s ease-in-out,
+    color 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
+}
+
+/* Disable transitions for elements that shouldn't animate */
+.no-transition,
+.no-transition * {
+  transition: none !important;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Theme transition animations */
+@keyframes diagonal-sweep {
+  0% {
+    clip-path: polygon(0% 100%, 0% 100%, 0% 100%);
+  }
+  50% {
+    clip-path: polygon(0% 100%, 100% 0%, 100% 0%, 0% 100%);
+  }
+  100% {
+    clip-path: polygon(100% 0%, 100% 0%, 100% 0%);
+  }
+}
+
+.theme-transition-overlay {
+  animation-fill-mode: forwards;
+}
+
+.animate-sweep {
+  animation: diagonal-sweep 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Sidebar collapse animations */
+@keyframes sidebar-expand {
+  from {
+    width: 4rem; /* 64px - collapsed width */
+  }
+  to {
+    width: 16rem; /* 256px - expanded width */
+  }
+}
+
+@keyframes sidebar-collapse {
+  from {
+    width: 16rem;
+  }
+  to {
+    width: 4rem;
+  }
+}
+
+.sidebar-expanding {
+  animation: sidebar-expand 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+.sidebar-collapsing {
+  animation: sidebar-collapse 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+/* Sidebar performance optimizations */
+.sidebar-container {
+  contain: layout style paint;
+  will-change: width;
+}
+
+.sidebar-container.animating {
+  will-change: width, transform;
+}
+
+/* Prevent text selection during animations */
+.sidebar-container.animating * {
+  user-select: none;
+  pointer-events: none;
+}
+
+.sidebar-container.animating a {
+  pointer-events: auto;
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.95 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.08 0 0);
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.08 0 0);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.08 0 0);
+  --popover-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.98 0 0);
+  --primary-foreground: oklch(0.08 0 0);
+  --secondary: oklch(0.12 0 0);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.12 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.12 0 0);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.15 0 0);
+  --input: oklch(0.25 0 0);
+  --ring: oklch(0.35 0 0);
+  --chart-1: oklch(0.7 0.15 220);
+  --chart-2: oklch(0.65 0.12 180);
+  --chart-3: oklch(0.6 0.08 140);
+  --chart-4: oklch(0.75 0.18 280);
+  --chart-5: oklch(0.8 0.16 40);
+  --sidebar: oklch(0.05 0 0);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.7 0.15 220);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.12 0 0);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.15 0 0);
+  --sidebar-ring: oklch(0.35 0 0);
+}
+
+@theme inline {
+  --font-sans: system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+  /* Liquid Glass UI inspired styles with proper dark mode support */
+@layer components {
+  /* Main Glass Card - Core liquid glass effect */
+  .glass-card {
+    @apply relative overflow-hidden rounded-2xl;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      0 1px 0 rgba(255, 255, 255, 0.15) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.05) inset;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark .glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 1px 0 rgba(255, 255, 255, 0.08) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.2) inset;
+  }
+
+  /* Glass Card Hover Effect */
+  .glass-card-hover:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.12),
+      0 1px 0 rgba(255, 255, 255, 0.2) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.08) inset;
+  }
+
+  .dark .glass-card-hover:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.6),
+      0 1px 0 rgba(255, 255, 255, 0.12) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.3) inset;
+  }
+
+  /* Glass Button */
+  .glass-button {
+    @apply relative overflow-hidden;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark .glass-button {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .glass-button-hover:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .dark .glass-button-hover:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Glass Input */
+  .glass-input {
+    background: rgba(0, 0, 0, 0.04) !important;
+    backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark .glass-input {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  }
+
+  .glass-input:focus {
+    background: rgba(0, 0, 0, 0.06) !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .dark .glass-input:focus {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* Glass Icon Container */
+  .glass-icon-container {
+    @apply p-3 rounded-xl;
+    background: rgba(99, 102, 241, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+  }
+
+  .dark .glass-icon-container {
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+  }
+
+  /* Glass Select Dropdown Content - Light Mode */
+  [data-radix-select-content] {
+    background: rgba(0, 0, 0, 0.04) !important;
+    backdrop-filter: blur(16px) saturate(150%) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Glass Select Dropdown Content - Dark Mode */
+  .dark [data-radix-select-content] {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(16px) saturate(150%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  }
+
+  /* Override Shadcn Select Content bg-popover */
+  .bg-popover {
+    background: rgba(0, 0, 0, 0.04) !important;
+    backdrop-filter: blur(16px) saturate(150%) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .dark .bg-popover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(16px) saturate(150%) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+  }
+
+  /* Glass Select Items - Light Mode */
+  [data-radix-select-item] {
+    background: transparent !important;
+  }
+
+  [data-radix-select-item]:hover,
+  [data-radix-select-item][data-highlighted] {
+    background: rgba(0, 0, 0, 0.06) !important;
+  }
+
+  [data-radix-select-item][data-state="checked"] {
+    background: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Glass Select Items - Dark Mode */
+  .dark [data-radix-select-item] {
+    background: transparent !important;
+  }
+
+  .dark [data-radix-select-item]:hover,
+  .dark [data-radix-select-item][data-highlighted] {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .dark [data-radix-select-item][data-state="checked"] {
+    background: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  /* Override Shadcn Select Item hover/focus states */
+  .hover\\:bg-accent\\/50:hover,
+  .focus\\:bg-accent:focus {
+    background: rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .dark .hover\\:bg-accent\\/50:hover,
+  .dark .focus\\:bg-accent:focus {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* Smooth transitions only - no movement animations */
+
+  /* Override Shadcn Card component to use glass colors when glass-card class is applied */
+  .glass-card.rounded-lg {
+    /* Override Shadcn Card's bg-card with glass background */
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 1rem !important; /* Use rounded-2xl instead of rounded-lg */
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      0 1px 0 rgba(255, 255, 255, 0.15) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.05) inset !important;
+  }
+
+  .dark .glass-card.rounded-lg {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 1px 0 rgba(255, 255, 255, 0.08) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.2) inset !important;
+  }
+
+  /* Glass Card Hover Effect for Shadcn Cards */
+  .glass-card-hover.rounded-lg:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.12),
+      0 1px 0 rgba(255, 255, 255, 0.2) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.08) inset !important;
+  }
+
+  .dark .glass-card-hover.rounded-lg:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.6),
+      0 1px 0 rgba(255, 255, 255, 0.12) inset,
+      0 -1px 0 rgba(0, 0, 0, 0.3) inset !important;
+  }
+}

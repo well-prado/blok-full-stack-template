@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Error Handling</title>
+</head>
+<body>
+    <h1>Test Error Handling</h1>
+    <button onclick="testAuth()">Test Auth Error</button>
+    <button onclick="clearCookies()">Clear All Cookies</button>
+    
+    <script>
+        function clearCookies() {
+            // Clear all cookies
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            alert('All cookies cleared!');
+        }
+        
+        async function testAuth() {
+            try {
+                const response = await fetch('/api/admin-dashboard', {
+                    credentials: 'include'
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    console.log('Error data:', errorData);
+                    alert(`Error: ${response.status} - ${errorData}`);
+                } else {
+                    const data = await response.json();
+                    console.log('Success:', data);
+                    alert('Success!');
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                alert('Fetch error: ' + error.message);
+            }
+        }
+        
+        console.log('Current cookies:', document.cookie);
+    </script>
+</body>
+</html>
