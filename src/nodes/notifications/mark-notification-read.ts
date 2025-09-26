@@ -3,8 +3,6 @@ import { type Context, GlobalError } from "@nanoservice-ts/shared";
 import { type ParamsDictionary, type JsonLikeObject } from "@nanoservice-ts/runner";
 
 import { db } from "../../../database/config";
-import { notifications } from "../../../database/schemas/notifications";
-import { eq, and } from "drizzle-orm";
 
 interface MarkNotificationReadInput {
   notificationId: string;
@@ -123,19 +121,16 @@ export default class MarkNotificationRead extends NanoService<MarkNotificationRe
       const readAt = isRead ? new Date().toISOString() : null;
 
       // Update notification (only if it belongs to the user)
-      const [updatedNotification] = await db
-        .update(notifications)
-        .set({
+      const updatedNotification = await db.notification.update({
+        where: {
+          id: inputs.notificationId,
+          userId: inputs.userId
+        },
+        data: {
           isRead,
-          readAt,
-        })
-        .where(
-          and(
-            eq(notifications.id, inputs.notificationId),
-            eq(notifications.userId, inputs.userId)
-          )
-        )
-        .returning();
+          readAt: readAt ? new Date(readAt) : null,
+        }
+      });
 
       if (!updatedNotification) {
         throw new Error("Notification not found or access denied");

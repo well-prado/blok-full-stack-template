@@ -4,9 +4,7 @@ import {
   NanoServiceResponse,
 } from "@nanoservice-ts/runner";
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
-import { eq } from "drizzle-orm";
 import { db } from "../../../../database/config";
-import { users } from "../../../../database/schemas";
 
 interface InputType {
   action: 'updateRole' | 'bulkUpdateRoles' | 'getRoleStats';
@@ -279,7 +277,7 @@ export default class UserRoleManager extends NanoService<InputType> {
     try {
       // Verify the current user is an admin
       const currentUser = await this.getCurrentUser(inputs.currentUserId);
-      if (!currentUser || currentUser.role !== 'admin') {
+      if (!currentUser || currentUser.role !== 'ADMIN') {
         throw new Error("Unauthorized: Only admins can manage user roles");
       }
 
@@ -319,13 +317,13 @@ export default class UserRoleManager extends NanoService<InputType> {
    * Get current user information
    */
   private async getCurrentUser(userId: string) {
-    const userResult = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
+    const user = await db.user.findUnique({
+      where: {
+        id: userId
+      }
+    });
 
-    return userResult.length > 0 ? userResult[0] : null;
+    return user;
   }
 
   /**
@@ -348,7 +346,8 @@ export default class UserRoleManager extends NanoService<InputType> {
     }
 
     // Check if role is actually changing
-    if (targetUser.role === inputs.newRole) {
+    const currentRole = targetUser.role === 'ADMIN' ? 'admin' : 'user';
+    if (currentRole === inputs.newRole) {
       return {
         updated: false,
         message: `User is already assigned the ${inputs.newRole} role`,
@@ -362,20 +361,17 @@ export default class UserRoleManager extends NanoService<InputType> {
     }
 
     // Update the role
-    const updatedUsers = await db
-      .update(users)
-      .set({ 
-        role: inputs.newRole,
-        updatedAt: new Date().toISOString()
-      })
-      .where(eq(users.id, inputs.userId))
-      .returning();
+    const updatedUser = await db.user.update({
+      where: { id: inputs.userId },
+      data: { 
+        role: inputs.newRole === 'admin' ? 'ADMIN' : 'USER',
+        updatedAt: new Date()
+      }
+    });
 
-    if (updatedUsers.length === 0) {
+    if (!updatedUser) {
       throw new Error("Failed to update user role");
     }
-
-    const updatedUser = updatedUsers[0];
 
     return {
       updated: true,
@@ -437,10 +433,10 @@ export default class UserRoleManager extends NanoService<InputType> {
    */
   private async getRoleStats(): Promise<RoleStats> {
     // Get user counts by role
-    const allUsers = await db.select().from(users);
-    
-    const totalUsers = allUsers.length;
-    const adminUsers = allUsers.filter(user => user.role === 'admin').length;
+    const totalUsers = await db.user.count();
+    const adminUsers = await db.user.count({
+      where: { role: 'ADMIN' }
+    });
     const regularUsers = totalUsers - adminUsers;
 
     // In a real system, this would query an audit log table

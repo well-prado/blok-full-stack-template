@@ -6,10 +6,8 @@ import {
   type ParamsDictionary,
 } from "@nanoservice-ts/runner";
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
-import { eq } from 'drizzle-orm';
 import * as bcrypt from 'bcryptjs';
 import { db } from '../../../../database/config';
-import { users, sessions, type NewSession } from '../../../../database/schemas';
 
 type UserLoginInputType = {
   email: string;
@@ -177,25 +175,26 @@ export default class UserLogin extends NanoService<UserLoginInputType> {
       ctx.logger.log(`Attempting login for user: ${inputs.email}`);
 
       // Find user by email - get ALL user fields
-      const userResult = await db
-        .select({
-          id: users.id,
-          email: users.email,
-          passwordHash: users.passwordHash,
-          name: users.name,
-          role: users.role,
-          emailVerified: users.emailVerified,
-          profileImage: users.profileImage,
-          preferences: users.preferences,
-          twoFactorEnabled: users.twoFactorEnabled,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt
-        })
-        .from(users)
-        .where(eq(users.email, inputs.email.toLowerCase()))
-        .limit(1);
+      const user = await db.user.findUnique({
+        where: {
+          email: inputs.email.toLowerCase()
+        },
+        select: {
+          id: true,
+          email: true,
+          passwordHash: true,
+          name: true,
+          role: true,
+          emailVerified: true,
+          profileImage: true,
+          preferences: true,
+          twoFactorEnabled: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
 
-      if (userResult.length === 0) {
+      if (!user) {
         const result: UserLoginOutputType = {
           success: false,
           message: 'Invalid email or password',
@@ -208,8 +207,6 @@ export default class UserLogin extends NanoService<UserLoginInputType> {
         response.setSuccess(result as unknown as JsonLikeObject);
         return response;
       }
-
-      const user = userResult[0];
 
       // Verify password
       const isPasswordValid = await bcrypt.compare(inputs.password, user.passwordHash);
@@ -237,23 +234,22 @@ export default class UserLogin extends NanoService<UserLoginInputType> {
       expiresAt.setHours(expiresAt.getHours() + sessionDurationHours);
 
       // Create session
-      const newSession: NewSession = {
-        userId: user.id,
-        token: sessionToken,
-        expiresAt: expiresAt.toISOString()
-      };
-
-      const sessionResult = await db.insert(sessions).values(newSession).returning({
-        id: sessions.id,
-        token: sessions.token,
-        expiresAt: sessions.expiresAt
+      const session = await db.session.create({
+        data: {
+          userId: user.id,
+          token: sessionToken,
+          expiresAt: expiresAt
+        },
+        select: {
+          id: true,
+          token: true,
+          expiresAt: true
+        }
       });
 
-      if (sessionResult.length === 0) {
+      if (!session) {
         throw new Error('Failed to create session');
       }
-
-      const createdSession = sessionResult[0];
 
       // Parse preferences JSON if it exists
       let parsedPreferences = {};
@@ -275,14 +271,14 @@ export default class UserLogin extends NanoService<UserLoginInputType> {
         profileImage: user.profileImage,
         preferences: parsedPreferences,
         twoFactorEnabled: user.twoFactorEnabled || false,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString()
       };
 
       const sessionData: CreatedSessionType = {
-        id: createdSession.id,
-        token: createdSession.token,
-        expiresAt: createdSession.expiresAt
+        id: session.id,
+        token: session.token,
+        expiresAt: session.expiresAt.toISOString()
       };
 
       const result: UserLoginOutputType = {

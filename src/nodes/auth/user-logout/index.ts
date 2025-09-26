@@ -6,9 +6,7 @@ import {
   type ParamsDictionary,
 } from "@nanoservice-ts/runner";
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
-import { eq } from 'drizzle-orm';
 import { db } from '../../../../database/config';
-import { sessions } from '../../../../database/schemas';
 
 type UserLogoutInputType = {
   sessionToken?: string;
@@ -112,12 +110,13 @@ export default class UserLogout extends NanoService<UserLogoutInputType> {
         ctx.logger.log(`Logging out all sessions for user: ${inputs.userId}`);
 
         // Delete all sessions for the user
-        const deleteResult = await db
-          .delete(sessions)
-          .where(eq(sessions.userId, inputs.userId))
-          .returning({ id: sessions.id });
+        const deleteResult = await db.session.deleteMany({
+          where: {
+            userId: inputs.userId
+          }
+        });
 
-        sessionsDestroyed = deleteResult.length;
+        sessionsDestroyed = deleteResult.count;
 
         const result: UserLogoutOutputType = {
           success: true,
@@ -161,12 +160,17 @@ export default class UserLogout extends NanoService<UserLogoutInputType> {
       ctx.logger.log('Attempting to logout session');
 
       // Find and delete the specific session
-      const deleteResult = await db
-        .delete(sessions)
-        .where(eq(sessions.token, sessionToken))
-        .returning({ id: sessions.id, userId: sessions.userId });
+      const deletedSession = await db.session.delete({
+        where: {
+          token: sessionToken
+        },
+        select: {
+          id: true,
+          userId: true
+        }
+      });
 
-      if (deleteResult.length === 0) {
+      if (!deletedSession) {
         const result: UserLogoutOutputType = {
           success: false,
           message: 'Session not found or already expired',
@@ -181,8 +185,7 @@ export default class UserLogout extends NanoService<UserLogoutInputType> {
         return response;
       }
 
-      sessionsDestroyed = deleteResult.length;
-      const deletedSession = deleteResult[0];
+      sessionsDestroyed = 1;
 
       const result: UserLogoutOutputType = {
         success: true,

@@ -5,17 +5,76 @@ import {
   ParamsDictionary,
 } from "@nanoservice-ts/runner";
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
-import { eq, desc, and, or, like, gte, lte, count } from "drizzle-orm";
 import { db } from "../../../../database/config";
-import { 
-  systemLogs, 
-  logRetentionPolicy,
-  type NewSystemLog, 
-  type SystemLogEntry,
-  ActionType,
-  LogRiskLevel,
-  ResourceType 
-} from "../../../../database/schemas";
+
+// Enums that were previously imported from Drizzle schemas
+enum ActionType {
+  CREATE = 'CREATE',
+  READ = 'READ', 
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+  LOGIN = 'LOGIN',
+  LOGOUT = 'LOGOUT',
+  REGISTER = 'REGISTER',
+  BULK_DELETE = 'BULK_DELETE',
+  BULK_UPDATE = 'BULK_UPDATE'
+}
+
+enum ResourceType {
+  USER = 'USER',
+  SESSION = 'SESSION',
+  NOTIFICATION = 'NOTIFICATION',
+  AUDIT_LOG = 'AUDIT_LOG',
+  SYSTEM_LOG = 'SYSTEM_LOG',
+  API_ENDPOINT = 'API_ENDPOINT',
+  PROFILE = 'PROFILE',
+  SETTINGS = 'SETTINGS',
+  ROLE = 'ROLE',
+  AUTH = 'AUTH',
+  SECURITY = 'SECURITY',
+  SYSTEM = 'SYSTEM'
+}
+
+enum LogRiskLevel {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM', 
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL'
+}
+
+// Types that were previously imported
+interface NewSystemLog {
+  id?: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  userRole: string;
+  action: string;
+  actionType: string;
+  resourceType: string;
+  resourceId?: string;
+  resourceName?: string;
+  httpMethod: string;
+  endpoint: string;
+  ipAddress: string;
+  userAgent: string;
+  details?: string;
+  changesSummary?: string;
+  workflowName?: string;
+  nodeName?: string;
+  executionTimeMs?: number;
+  statusCode: number;
+  success?: boolean;
+  riskLevel: string;
+  complianceFlags?: string;
+  createdAt?: Date;
+}
+
+interface SystemLogEntry extends NewSystemLog {
+  id: string;
+  createdAt: Date;
+  changesSummary?: any;
+}
 
 interface InputType {
   // Action type
@@ -222,25 +281,22 @@ export default class SystemActionLogger extends NanoService<InputType> {
       userEmail: inputs.userEmail || 'system@blok.local',
       userName: inputs.userName || 'System',
       userRole: inputs.userRole || 'system',
+      action: inputs.actionType || this.inferActionType(inputs.httpMethod || ''),
       actionType: inputs.actionType || this.inferActionType(inputs.httpMethod || ''),
       resourceType: inputs.resourceType || this.inferResourceType(inputs.endpoint || ''),
-      resourceId: inputs.resourceId || null,
-      resourceName: inputs.resourceName || null,
+      resourceId: inputs.resourceId || undefined,
+      resourceName: inputs.resourceName || undefined,
       httpMethod: inputs.httpMethod || 'UNKNOWN',
       endpoint: inputs.endpoint || 'unknown',
-      workflowName: inputs.workflowName || null,
-      nodeName: inputs.nodeName || null,
+      workflowName: inputs.workflowName || undefined,
+      nodeName: inputs.nodeName || undefined,
       statusCode: inputs.statusCode || 200,
       success: inputs.success !== false,
-      errorMessage: inputs.errorMessage || null,
       executionTimeMs: inputs.executionTimeMs || 
-        (ctx.vars?.systemLogStartTime ? Date.now() - (ctx.vars.systemLogStartTime as unknown as number) : null),
-      requestSize: inputs.requestSize || null,
-      changesSummary: inputs.changesSummary ? JSON.stringify(inputs.changesSummary) : null,
-      ipAddress: inputs.ipAddress || this.extractIpFromContext(ctx),
-      userAgent: inputs.userAgent || this.extractUserAgentFromContext(ctx),
-      sessionId: inputs.sessionId || null,
-      affectedUsersCount: inputs.affectedUsersCount || 0,
+        (ctx.vars?.systemLogStartTime ? Date.now() - (ctx.vars.systemLogStartTime as unknown as number) : 0),
+      changesSummary: inputs.changesSummary ? JSON.stringify(inputs.changesSummary) : undefined,
+      ipAddress: inputs.ipAddress || this.extractIpFromContext(ctx) || 'unknown',
+      userAgent: inputs.userAgent || this.extractUserAgentFromContext(ctx) || 'unknown',
       complianceFlags: JSON.stringify(['audit_trail', 'blame_tracking', 'enterprise_logging']),
       riskLevel: this.assessRiskLevel(inputs.actionType, inputs.resourceType, inputs.affectedUsersCount || 0)
     };
@@ -248,7 +304,7 @@ export default class SystemActionLogger extends NanoService<InputType> {
     // Asynchronous logging to prevent performance impact
     setImmediate(async () => {
       try {
-        await db.insert(systemLogs).values(logEntry);
+        await db.systemLog.create({ data: logEntry });
       } catch (error) {
         console.error('System logging failed:', error);
         // Could implement fallback logging to file here
@@ -270,19 +326,19 @@ export default class SystemActionLogger extends NanoService<InputType> {
     const limit = Math.min(inputs.limit || 50, 1000); // Max 1000 for performance
     const offset = inputs.offset || 0;
     
-    // Build where conditions
-    const conditions = [];
+    // Build where conditions for Prisma
+    const where: any = {};
     
     if (inputs.filterActionType) {
-      conditions.push(eq(systemLogs.actionType, inputs.filterActionType));
+      where.action = inputs.filterActionType;
     }
     
     if (inputs.filterResourceType) {
-      conditions.push(eq(systemLogs.resourceType, inputs.filterResourceType));
+      where.resourceType = inputs.filterResourceType;
     }
     
     if (inputs.filterRiskLevel) {
-      conditions.push(eq(systemLogs.riskLevel, inputs.filterRiskLevel));
+      where.riskLevel = inputs.filterRiskLevel;
     }
     
     if (inputs.filterSuccess !== undefined && inputs.filterSuccess !== null) {
@@ -293,54 +349,52 @@ export default class SystemActionLogger extends NanoService<InputType> {
           // Skip empty strings
         } else {
           successValue = inputs.filterSuccess === 'true';
-          conditions.push(eq(systemLogs.success, successValue));
+          where.success = successValue;
         }
       } else {
         successValue = Boolean(inputs.filterSuccess);
-        conditions.push(eq(systemLogs.success, successValue));
+        where.success = successValue;
       }
     }
     
     if (inputs.dateRange) {
-      conditions.push(gte(systemLogs.createdAt, inputs.dateRange.start));
-      conditions.push(lte(systemLogs.createdAt, inputs.dateRange.end));
+      where.createdAt = {
+        gte: new Date(inputs.dateRange.start),
+        lte: new Date(inputs.dateRange.end)
+      };
     }
     
     if (inputs.searchQuery) {
       // Enhanced text search across multiple fields including user info
-      const searchTerm = `%${inputs.searchQuery}%`;
-      conditions.push(
-        or(
-          like(systemLogs.userName, searchTerm),
-          like(systemLogs.userEmail, searchTerm),
-          like(systemLogs.endpoint, searchTerm),
-          like(systemLogs.resourceName, searchTerm),
-          like(systemLogs.changesSummary, searchTerm),
-          like(systemLogs.workflowName, searchTerm),
-          like(systemLogs.nodeName, searchTerm),
-          like(systemLogs.resourceType, searchTerm)
-        )
-      );
+      const searchTerm = inputs.searchQuery;
+      where.OR = [
+        { userName: { contains: searchTerm } },
+        { userEmail: { contains: searchTerm } },
+        { endpoint: { contains: searchTerm } },
+        { resourceName: { contains: searchTerm } },
+        { changesSummary: { contains: searchTerm } },
+        { workflowName: { contains: searchTerm } },
+        { nodeName: { contains: searchTerm } },
+        { resourceType: { contains: searchTerm } }
+      ];
     }
 
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-    
     // Execute query with pagination
-    const logs = await db
-      .select()
-      .from(systemLogs)
-      .where(whereClause)
-      .orderBy(desc(systemLogs.createdAt))
-      .limit(limit)
-      .offset(offset);
+    const logs = await db.systemLog.findMany({
+      where,
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: limit,
+      skip: offset
+    });
 
     // Get total count for pagination
-    const totalResult = await db
-      .select({ count: count() })
-      .from(systemLogs)
-      .where(whereClause);
+    const totalCount = await db.systemLog.count({
+      where
+    });
     
-    const total = totalResult[0]?.count || 0;
+    const total = totalCount;
 
     // Parse JSON fields
     const parsedLogs = logs.map(log => ({
@@ -365,36 +419,41 @@ export default class SystemActionLogger extends NanoService<InputType> {
     const today = new Date().toISOString().split('T')[0];
     
     // Get total logs count
-    const totalResult = await db.select({ count: count() }).from(systemLogs);
-    const totalLogs = totalResult[0]?.count || 0;
+    const totalLogs = await db.systemLog.count();
 
     // Get today's logs
-    const todayResult = await db
-      .select({ count: count() })
-      .from(systemLogs)
-      .where(like(systemLogs.createdAt, `${today}%`));
-    const todayLogs = todayResult[0]?.count || 0;
+    const startOfDay = new Date(today + 'T00:00:00.000Z');
+    const endOfDay = new Date(today + 'T23:59:59.999Z');
+    const todayLogs = await db.systemLog.count({
+      where: {
+        createdAt: {
+          gte: startOfDay,
+          lte: endOfDay
+        }
+      }
+    });
 
     // Get failed actions
-    const failedResult = await db
-      .select({ count: count() })
-      .from(systemLogs)
-      .where(eq(systemLogs.success, false));
-    const failedActions = failedResult[0]?.count || 0;
+    const failedActions = await db.systemLog.count({
+      where: {
+        success: false
+      }
+    });
 
     // Get high risk actions
-    const highRiskResult = await db
-      .select({ count: count() })
-      .from(systemLogs)
-      .where(eq(systemLogs.riskLevel, LogRiskLevel.HIGH));
-    const highRiskActions = highRiskResult[0]?.count || 0;
+    const highRiskActions = await db.systemLog.count({
+      where: {
+        riskLevel: LogRiskLevel.HIGH
+      }
+    });
 
     // Get recent logs for analysis
-    const recentLogs = await db
-      .select()
-      .from(systemLogs)
-      .orderBy(desc(systemLogs.createdAt))
-      .limit(1000); // Analyze last 1000 logs
+    const recentLogs = await db.systemLog.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 1000 // Analyze last 1000 logs
+    });
 
     // Calculate statistics from recent logs
     const topUsers = this.calculateTopUsers(recentLogs);
@@ -419,33 +478,36 @@ export default class SystemActionLogger extends NanoService<InputType> {
    */
   private async performRetentionCleanup(): Promise<any> {
     // Get retention policy (create default if none exists)
-    let policy = await db.select().from(logRetentionPolicy).limit(1);
+    let retentionPolicy = await db.logRetentionPolicy.findFirst();
     
-    if (policy.length === 0) {
-      await db.insert(logRetentionPolicy).values({
-        retentionDays: 1095, // 3 years
-        archiveDays: 1825,   // 5 years total
+    if (!retentionPolicy) {
+      retentionPolicy = await db.logRetentionPolicy.create({
+        data: {
+          retentionDays: 1095, // 3 years
+          archiveDays: 1825,   // 5 years total
+        }
       });
-      policy = await db.select().from(logRetentionPolicy).limit(1);
     }
-
-    const retentionPolicy = policy[0];
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionPolicy.archiveDays);
 
     // Delete logs older than retention period
-    const deleteResult = await db
-      .delete(systemLogs)
-      .where(lte(systemLogs.createdAt, cutoffDate.toISOString()));
+    const deleteResult = await db.systemLog.deleteMany({
+      where: {
+        createdAt: {
+          lte: cutoffDate
+        }
+      }
+    });
 
     // Update last cleanup timestamp
-    await db
-      .update(logRetentionPolicy)
-      .set({ lastCleanup: new Date().toISOString() })
-      .where(eq(logRetentionPolicy.id, retentionPolicy.id));
+    await db.logRetentionPolicy.update({
+      where: { id: retentionPolicy.id },
+      data: { lastCleanup: new Date() }
+    });
 
     return {
-      deletedLogs: deleteResult.rowsAffected || 0,
+      deletedLogs: deleteResult.count || 0,
       cutoffDate: cutoffDate.toISOString(),
       nextCleanup: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // Tomorrow
     };
@@ -657,11 +719,11 @@ export default class SystemActionLogger extends NanoService<InputType> {
       try {
         const logEntry: NewSystemLog = {
           ...entry,
-          changesSummary: entry.changesSummary ? JSON.stringify(entry.changesSummary) : null,
+          changesSummary: entry.changesSummary ? JSON.stringify(entry.changesSummary) : undefined,
           complianceFlags: JSON.stringify(['audit_trail', 'blame_tracking'])
         };
         
-        await db.insert(systemLogs).values(logEntry);
+        await db.systemLog.create({ data: logEntry });
       } catch (error) {
         console.error('Static system logging failed:', error);
       }

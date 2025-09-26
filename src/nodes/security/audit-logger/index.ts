@@ -4,9 +4,20 @@ import {
   NanoServiceResponse,
 } from "@nanoservice-ts/runner";
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
-import { eq, desc, and, like } from "drizzle-orm";
 import { db } from "../../../../database/config";
-import { auditLogs, type NewAuditLog } from "../../../../database/schemas";
+
+// Type definition for audit log creation
+interface NewAuditLog {
+  userId?: string | null;
+  action: string;
+  resource?: string | null;
+  resourceId?: string | null;
+  details?: string | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  success?: boolean;
+  errorMessage?: string | null;
+}
 
 interface InputType {
   action: 'log' | 'query' | 'getRecentActivity';
@@ -137,15 +148,14 @@ export default class AuditLogger extends NanoService<InputType> {
       errorMessage: inputs.errorMessage || null,
     };
 
-    const insertedLogs = await db
-      .insert(auditLogs)
-      .values(logEntry)
-      .returning();
+    const insertedLog = await db.auditLog.create({
+      data: logEntry
+    });
 
     return {
       logged: true,
-      logId: insertedLogs[0].id,
-      timestamp: insertedLogs[0].createdAt
+      logId: insertedLog.id,
+      timestamp: insertedLog.createdAt.toISOString()
     };
   }
 
@@ -157,46 +167,46 @@ export default class AuditLogger extends NanoService<InputType> {
     const offset = inputs.offset || 0;
     
     // Build where conditions
-    const conditions = [];
+    const where: any = {};
     
     if (inputs.filterUserId) {
-      conditions.push(eq(auditLogs.userId, inputs.filterUserId));
+      where.userId = inputs.filterUserId;
     }
     
     if (inputs.filterAction) {
-      conditions.push(like(auditLogs.action, `%${inputs.filterAction}%`));
+      where.action = { contains: inputs.filterAction };
     }
     
     if (inputs.filterResource) {
-      conditions.push(eq(auditLogs.resource, inputs.filterResource));
+      where.resource = inputs.filterResource;
     }
     
-    if (inputs.startDate) {
-      conditions.push(eq(auditLogs.createdAt, `>= '${inputs.startDate}'`));
-    }
-    
-    if (inputs.endDate) {
-      conditions.push(eq(auditLogs.createdAt, `<= '${inputs.endDate}'`));
+    if (inputs.startDate || inputs.endDate) {
+      where.createdAt = {};
+      if (inputs.startDate) {
+        where.createdAt.gte = new Date(inputs.startDate);
+      }
+      if (inputs.endDate) {
+        where.createdAt.lte = new Date(inputs.endDate);
+      }
     }
 
     // Execute query
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-    
-    const logs = await db
-      .select()
-      .from(auditLogs)
-      .where(whereClause)
-      .orderBy(desc(auditLogs.createdAt))
-      .limit(limit)
-      .offset(offset);
+    const logs = await db.auditLog.findMany({
+      where,
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: limit,
+      skip: offset
+    });
 
     // Get total count for pagination
-    const totalResult = await db
-      .select({ count: auditLogs.id })
-      .from(auditLogs)
-      .where(whereClause);
+    const totalCount = await db.auditLog.count({
+      where
+    });
     
-    const total = totalResult.length;
+    const total = totalCount;
 
     // Parse details field for each log
     const parsedLogs = logs.map(log => ({
@@ -219,11 +229,12 @@ export default class AuditLogger extends NanoService<InputType> {
     const limit = inputs.limit || 20;
     
     // Get recent logs
-    const recentLogs = await db
-      .select()
-      .from(auditLogs)
-      .orderBy(desc(auditLogs.createdAt))
-      .limit(limit);
+    const recentLogs = await db.auditLog.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: limit
+    });
 
     // Get activity statistics
     const stats = {
@@ -273,14 +284,16 @@ export default class AuditLogger extends NanoService<InputType> {
     errorMessage?: string
   ) {
     try {
-      await db.insert(auditLogs).values({
+    await db.auditLog.create({
+      data: {
         userId: userId || null,
         action: event,
         resource: 'security',
         details: details ? JSON.stringify(details) : null,
         success,
         errorMessage: errorMessage || null,
-      });
+      }
+    });
     } catch (error) {
       console.error('Failed to log security event:', error);
     }

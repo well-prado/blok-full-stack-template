@@ -4,10 +4,8 @@ import {
   NanoServiceResponse,
 } from "@nanoservice-ts/runner";
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
-import { eq } from "drizzle-orm";
 import crypto from "crypto";
 import { db } from "../../../../database/config";
-import { users } from "../../../../database/schemas";
 
 interface InputType {
   action: 'setup' | 'verify' | 'disable' | 'generateBackupCodes' | 'verifyBackupCode';
@@ -287,13 +285,13 @@ export default class TwoFactorAuth extends NanoService<InputType> {
    * Get user by ID
    */
   private async getUser(userId: string) {
-    const userResult = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
+    const user = await db.user.findUnique({
+      where: {
+        id: userId
+      }
+    });
 
-    return userResult.length > 0 ? userResult[0] : null;
+    return user;
   }
 
   /**
@@ -310,14 +308,14 @@ export default class TwoFactorAuth extends NanoService<InputType> {
     const backupCodes = this.createBackupCodes();
 
     // Store the secret temporarily (not enabled until verified)
-    await db
-      .update(users)
-      .set({ 
+    await db.user.update({
+      where: { id: user.id },
+      data: { 
         twoFactorSecret: secret,
         backupCodes: JSON.stringify(backupCodes),
-        updatedAt: new Date().toISOString()
-      })
-      .where(eq(users.id, user.id));
+        updatedAt: new Date()
+      }
+    });
 
     return {
       secret,
@@ -349,13 +347,13 @@ export default class TwoFactorAuth extends NanoService<InputType> {
 
     // If this is setup verification, enable 2FA
     if (secret && !user.twoFactorEnabled) {
-      await db
-        .update(users)
-        .set({ 
+      await db.user.update({
+        where: { id: user.id },
+        data: { 
           twoFactorEnabled: true,
-          updatedAt: new Date().toISOString()
-        })
-        .where(eq(users.id, user.id));
+          updatedAt: new Date()
+        }
+      });
 
       return {
         enabled: true,
@@ -377,15 +375,15 @@ export default class TwoFactorAuth extends NanoService<InputType> {
       throw new Error("2FA is not enabled for this user");
     }
 
-    await db
-      .update(users)
-      .set({ 
+    await db.user.update({
+      where: { id: user.id },
+      data: { 
         twoFactorEnabled: false,
         twoFactorSecret: null,
         backupCodes: null,
-        updatedAt: new Date().toISOString()
-      })
-      .where(eq(users.id, user.id));
+        updatedAt: new Date()
+      }
+    });
 
     return {
       disabled: true,
@@ -403,13 +401,13 @@ export default class TwoFactorAuth extends NanoService<InputType> {
 
     const backupCodes = this.createBackupCodes();
 
-    await db
-      .update(users)
-      .set({ 
+    await db.user.update({
+      where: { id: user.id },
+      data: { 
         backupCodes: JSON.stringify(backupCodes),
-        updatedAt: new Date().toISOString()
-      })
-      .where(eq(users.id, user.id));
+        updatedAt: new Date()
+      }
+    });
 
     return {
       backupCodes,
@@ -439,13 +437,13 @@ export default class TwoFactorAuth extends NanoService<InputType> {
     // Remove the used backup code
     backupCodes.splice(codeIndex, 1);
 
-    await db
-      .update(users)
-      .set({ 
+    await db.user.update({
+      where: { id: user.id },
+      data: { 
         backupCodes: JSON.stringify(backupCodes),
-        updatedAt: new Date().toISOString()
-      })
-      .where(eq(users.id, user.id));
+        updatedAt: new Date()
+      }
+    });
 
     return {
       verified: true,

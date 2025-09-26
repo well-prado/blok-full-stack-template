@@ -6,10 +6,8 @@ import {
   type ParamsDictionary,
 } from "@nanoservice-ts/runner";
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
-import { eq } from 'drizzle-orm';
 import * as bcrypt from 'bcryptjs';
 import { db } from '../../../../database/config';
-import { users } from '../../../../database/schemas';
 
 type UserUpdateInputType = {
   id: string;
@@ -167,16 +165,17 @@ export default class UserUpdate extends NanoService<UserUpdateInputType> {
       }
 
       // Check if user exists
-      const existingUser = await db
-        .select({ 
-          id: users.id,
-          email: users.email 
-        })
-        .from(users)
-        .where(eq(users.id, inputs.id))
-        .limit(1);
+      const existingUser = await db.user.findUnique({
+        where: {
+          id: inputs.id
+        },
+        select: {
+          id: true,
+          email: true
+        }
+      });
 
-      if (existingUser.length === 0) {
+      if (!existingUser) {
         const result: UserUpdateOutputType = {
           success: false,
           message: 'User not found',
@@ -216,13 +215,16 @@ export default class UserUpdate extends NanoService<UserUpdateInputType> {
         }
 
         // Check if email is already taken by another user
-        const emailCheck = await db
-          .select({ id: users.id })
-          .from(users)
-          .where(eq(users.email, inputs.email.toLowerCase()))
-          .limit(1);
+        const emailCheck = await db.user.findUnique({
+          where: {
+            email: inputs.email.toLowerCase()
+          },
+          select: {
+            id: true
+          }
+        });
 
-        if (emailCheck.length > 0 && emailCheck[0].id !== inputs.id) {
+        if (emailCheck && emailCheck.id !== inputs.id) {
           const result: UserUpdateOutputType = {
             success: false,
             message: 'Email already taken by another user',
@@ -314,25 +316,25 @@ export default class UserUpdate extends NanoService<UserUpdateInputType> {
       updateData.updatedAt = new Date().toISOString();
 
       // Perform the update
-      const updatedUsers = await db
-        .update(users)
-        .set(updateData)
-        .where(eq(users.id, inputs.id))
-        .returning({
-          id: users.id,
-          email: users.email,
-          name: users.name,
-          role: users.role,
-          emailVerified: users.emailVerified,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt
-        });
+      const updatedUser = await db.user.update({
+        where: {
+          id: inputs.id
+        },
+        data: updateData,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          emailVerified: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
 
-      if (updatedUsers.length === 0) {
+      if (!updatedUser) {
         throw new Error('Failed to update user');
       }
-
-      const updatedUser = updatedUsers[0];
 
       const userData: UpdatedUserType = {
         id: updatedUser.id,
@@ -340,8 +342,8 @@ export default class UserUpdate extends NanoService<UserUpdateInputType> {
         name: updatedUser.name,
         role: updatedUser.role,
         emailVerified: updatedUser.emailVerified,
-        createdAt: updatedUser.createdAt,
-        updatedAt: updatedUser.updatedAt
+        createdAt: updatedUser.createdAt.toISOString(),
+        updatedAt: updatedUser.updatedAt.toISOString()
       };
 
       const result: UserUpdateOutputType = {

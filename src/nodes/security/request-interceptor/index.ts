@@ -7,7 +7,6 @@ import {
 import { type Context } from "@nanoservice-ts/shared";
 import { db } from "../../../../database/config";
 import { 
-  systemLogs, 
   type NewSystemLog, 
   ActionType, 
   LogRiskLevel, 
@@ -283,7 +282,7 @@ export default class RequestInterceptor extends NanoService<InputType> {
       // Asynchronous logging to prevent performance impact
       setImmediate(async () => {
         try {
-          await db.insert(systemLogs).values(logEntry);
+          await db.systemLog.create({ data: logEntry });
         } catch (error) {
           console.error('Database logging failed:', error);
         }

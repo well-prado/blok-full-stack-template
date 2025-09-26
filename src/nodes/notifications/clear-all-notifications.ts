@@ -3,8 +3,6 @@ import { type Context, GlobalError } from "@nanoservice-ts/shared";
 import { type ParamsDictionary, type JsonLikeObject } from "@nanoservice-ts/runner";
 
 import { db } from "../../../database/config";
-import { notifications } from "../../../database/schemas/notifications";
-import { eq, and } from "drizzle-orm";
 
 interface ClearAllNotificationsInput {
   userId: string;
@@ -86,47 +84,42 @@ export default class ClearAllNotifications extends NanoService<ClearAllNotificat
       const markAsRead = inputs.markAsRead || false;
       const olderThanDays = inputs.olderThanDays;
 
-      // Build conditions
-      const conditions = [eq(notifications.userId, inputs.userId)];
+      // Build conditions for Prisma
+      const where: any = {
+        userId: inputs.userId
+      };
 
       // Add date filter if specified
       if (olderThanDays !== undefined && olderThanDays > 0) {
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
-        const cutoffISO = cutoffDate.toISOString();
         
-        // Add condition for notifications older than cutoff date
-        conditions.push(
-          // Using a simple string comparison since SQLite stores dates as ISO strings
-          // This works because ISO date strings are lexicographically sortable
-          eq(notifications.createdAt, cutoffISO) // This is a placeholder - we'd need a proper date comparison
-        );
+        where.createdAt = {
+          lt: cutoffDate
+        };
       }
 
-      let result;
       let affectedCount = 0;
 
       if (markAsRead) {
         // Mark notifications as read
-        const readAt = new Date().toISOString();
-        result = await db
-          .update(notifications)
-          .set({
+        const readAt = new Date();
+        const result = await db.notification.updateMany({
+          where,
+          data: {
             isRead: true,
             readAt,
-          })
-          .where(and(...conditions))
-          .returning({ id: notifications.id });
+          }
+        });
         
-        affectedCount = result.length;
+        affectedCount = result.count;
       } else {
         // Delete notifications
-        result = await db
-          .delete(notifications)
-          .where(and(...conditions))
-          .returning({ id: notifications.id });
+        const result = await db.notification.deleteMany({
+          where
+        });
         
-        affectedCount = result.length;
+        affectedCount = result.count;
       }
 
       // Store result in context

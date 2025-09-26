@@ -3,7 +3,7 @@ import { type Context, GlobalError } from "@nanoservice-ts/shared";
 import { type ParamsDictionary, type JsonLikeObject } from "@nanoservice-ts/runner";
 
 import { db } from "../../../database/config";
-import { notifications, type CreateNotificationPayload } from "../../../database/schemas/notifications";
+import { type CreateNotificationPayload } from "../../../database/schemas/notifications";
 
 interface CreateNotificationInput {
   userId: string;
@@ -195,13 +195,14 @@ export default class CreateNotification extends NanoService<CreateNotificationIn
       };
 
       // Insert notification into database
-      const [createdNotification] = await db
-        .insert(notifications)
-        .values({
+      const createdNotification = await db.notification.create({
+        data: {
           ...notificationData,
+          type: notificationData.type ? notificationData.type.toUpperCase() as any : undefined,
+          priority: notificationData.priority ? notificationData.priority.toUpperCase() as any : undefined,
           metadata: notificationData.metadata ? JSON.stringify(notificationData.metadata) : undefined,
-        })
-        .returning();
+        }
+      });
 
       // Store notification data in context for other nodes
       if (ctx.vars === undefined) ctx.vars = {};

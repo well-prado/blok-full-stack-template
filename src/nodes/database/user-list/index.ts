@@ -6,9 +6,7 @@ import {
   type ParamsDictionary,
 } from "@nanoservice-ts/runner";
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
-import { desc, asc, like, eq, count } from 'drizzle-orm';
 import { db } from '../../../../database/config';
-import { users } from '../../../../database/schemas';
 
 type UserListInputType = {
   page?: number;
@@ -209,76 +207,66 @@ export default class UserList extends NanoService<UserListInputType> {
 
       ctx.logger.log(`Listing users: page ${page}, limit ${limit}, sortBy ${sortBy} ${sortOrder}`);
 
-      // Build where conditions
-      const whereConditions = [];
+      // Build where conditions for Prisma
+      const where: any = {};
       
       if (inputs.search) {
-        const searchTerm = `%${inputs.search}%`;
-        whereConditions.push(
-          like(users.name, searchTerm),
-          like(users.email, searchTerm)
-        );
+        where.OR = [
+          { name: { contains: inputs.search } },
+          { email: { contains: inputs.search } }
+        ];
       }
 
       if (inputs.role) {
-        whereConditions.push(eq(users.role, inputs.role));
+        where.role = inputs.role === 'admin' ? 'ADMIN' : 'USER';
       }
 
       if (typeof inputs.emailVerified === 'boolean') {
-        whereConditions.push(eq(users.emailVerified, inputs.emailVerified));
+        where.emailVerified = inputs.emailVerified;
       }
 
-      // Build order by clause
-      let orderByClause;
+      // Build order by clause for Prisma
+      const orderBy: any = {};
       switch (sortBy) {
         case 'createdAt':
-          orderByClause = sortOrder === 'asc' ? asc(users.createdAt) : desc(users.createdAt);
+          orderBy.createdAt = sortOrder;
           break;
         case 'updatedAt':
-          orderByClause = sortOrder === 'asc' ? asc(users.updatedAt) : desc(users.updatedAt);
+          orderBy.updatedAt = sortOrder;
           break;
         case 'name':
-          orderByClause = sortOrder === 'asc' ? asc(users.name) : desc(users.name);
+          orderBy.name = sortOrder;
           break;
         case 'email':
-          orderByClause = sortOrder === 'asc' ? asc(users.email) : desc(users.email);
+          orderBy.email = sortOrder;
           break;
         default:
-          orderByClause = desc(users.createdAt);
+          orderBy.createdAt = 'desc';
       }
 
       // Get total count for pagination
-      const totalCountResult = await db
-        .select({ count: count() })
-        .from(users)
-        .where(whereConditions.length > 0 ? whereConditions[0] : undefined);
+      const totalUsers = await db.user.count({
+        where
+      });
 
-      const totalUsers = totalCountResult[0]?.count || 0;
       const totalPages = Math.ceil(totalUsers / limit);
 
       // Get users with pagination
-      const baseQuery = db
-        .select({
-          id: users.id,
-          email: users.email,
-          name: users.name,
-          role: users.role,
-          emailVerified: users.emailVerified,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt
-        })
-        .from(users);
-
-      const userResults = whereConditions.length > 0
-        ? await baseQuery
-            .where(whereConditions[0])
-            .orderBy(orderByClause)
-            .limit(limit)
-            .offset(offset)
-        : await baseQuery
-            .orderBy(orderByClause)
-            .limit(limit)
-            .offset(offset);
+      const userResults = await db.user.findMany({
+        where,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          emailVerified: true,
+          createdAt: true,
+          updatedAt: true
+        },
+        orderBy,
+        take: limit,
+        skip: offset
+      });
 
       // Map results to proper type
       const userList: ListedUserType[] = userResults.map(user => ({
@@ -287,8 +275,8 @@ export default class UserList extends NanoService<UserListInputType> {
         name: user.name,
         role: user.role,
         emailVerified: user.emailVerified,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString()
       }));
 
       // Build pagination info

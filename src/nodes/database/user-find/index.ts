@@ -6,9 +6,7 @@ import {
   type ParamsDictionary,
 } from "@nanoservice-ts/runner";
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
-import { eq, or } from 'drizzle-orm';
 import { db } from '../../../../database/config';
-import { users } from '../../../../database/schemas';
 
 type UserFindInputType = {
   id?: string;
@@ -150,46 +148,36 @@ export default class UserFind extends NanoService<UserFindInputType> {
 
       ctx.logger.log(`Finding user by ${inputs.id ? 'ID: ' + inputs.id : 'email: ' + inputs.email}`);
 
-      // Build the query conditions
-      const conditions = [];
-      if (inputs.id) {
-        conditions.push(eq(users.id, inputs.id));
-      }
-      if (inputs.email) {
-        conditions.push(eq(users.email, inputs.email.toLowerCase()));
+      // Build the where condition
+      const where: any = {};
+      if (inputs.id && inputs.email) {
+        // If both provided, use OR condition
+        where.OR = [
+          { id: inputs.id },
+          { email: inputs.email.toLowerCase() }
+        ];
+      } else if (inputs.id) {
+        where.id = inputs.id;
+      } else if (inputs.email) {
+        where.email = inputs.email.toLowerCase();
       }
 
       // Execute the query with conditional field selection
-      const userResult = inputs.includePassword 
-        ? await db
-            .select({
-              id: users.id,
-              email: users.email,
-              passwordHash: users.passwordHash,
-              name: users.name,
-              role: users.role,
-              emailVerified: users.emailVerified,
-              createdAt: users.createdAt,
-              updatedAt: users.updatedAt
-            })
-            .from(users)
-            .where(conditions.length === 1 ? conditions[0] : or(...conditions))
-            .limit(1)
-        : await db
-            .select({
-              id: users.id,
-              email: users.email,
-              name: users.name,
-              role: users.role,
-              emailVerified: users.emailVerified,
-              createdAt: users.createdAt,
-              updatedAt: users.updatedAt
-            })
-            .from(users)
-            .where(conditions.length === 1 ? conditions[0] : or(...conditions))
-            .limit(1);
+      const user = await db.user.findFirst({
+        where,
+        select: {
+          id: true,
+          email: true,
+          passwordHash: inputs.includePassword || false,
+          name: true,
+          role: true,
+          emailVerified: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
 
-      if (userResult.length === 0) {
+      if (!user) {
         const result: UserFindOutputType = {
           success: false,
           message: 'User not found',
@@ -203,22 +191,20 @@ export default class UserFind extends NanoService<UserFindInputType> {
         return response;
       }
 
-      const foundUser = userResult[0];
-
       // Build the response user object
       const userData: FoundUserType = {
-        id: foundUser.id,
-        email: foundUser.email,
-        name: foundUser.name,
-        role: foundUser.role,
-        emailVerified: foundUser.emailVerified,
-        createdAt: foundUser.createdAt,
-        updatedAt: foundUser.updatedAt
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        emailVerified: user.emailVerified,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString()
       };
 
       // Include password if requested
-      if (inputs.includePassword && 'password' in foundUser) {
-        userData.password = foundUser.password as string;
+      if (inputs.includePassword && user.passwordHash) {
+        userData.password = user.passwordHash;
       }
 
       const result: UserFindOutputType = {
@@ -233,7 +219,7 @@ export default class UserFind extends NanoService<UserFindInputType> {
       ctx.vars.userFindResult = result as unknown as ParamsDictionary;
       ctx.vars.foundUser = userData as unknown as ParamsDictionary;
 
-      ctx.logger.log(`User found: ${foundUser.email} (${foundUser.role})`);
+      ctx.logger.log(`User found: ${user.email} (${user.role})`);
       response.setSuccess(result as unknown as JsonLikeObject);
 
     } catch (error: unknown) {

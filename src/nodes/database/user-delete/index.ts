@@ -6,9 +6,7 @@ import {
   type ParamsDictionary,
 } from "@nanoservice-ts/runner";
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
-import { eq } from 'drizzle-orm';
 import { db } from '../../../../database/config';
-import { users, sessions } from '../../../../database/schemas';
 
 type UserDeleteInputType = {
   id: string;
@@ -122,18 +120,19 @@ export default class UserDelete extends NanoService<UserDeleteInputType> {
       ctx.logger.log(`Attempting to delete user: ${inputs.id}`);
 
       // Check if user exists and get their data before deletion
-      const existingUser = await db
-        .select({
-          id: users.id,
-          email: users.email,
-          name: users.name,
-          role: users.role
-        })
-        .from(users)
-        .where(eq(users.id, inputs.id))
-        .limit(1);
+      const existingUser = await db.user.findUnique({
+        where: {
+          id: inputs.id
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true
+        }
+      });
 
-      if (existingUser.length === 0) {
+      if (!existingUser) {
         const result: UserDeleteOutputType = {
           success: false,
           message: 'User not found',
@@ -155,12 +154,13 @@ export default class UserDelete extends NanoService<UserDeleteInputType> {
       if (inputs.cascadeDelete !== false) {
         ctx.logger.log(`Deleting sessions for user: ${inputs.id}`);
         
-        const deletedSessions = await db
-          .delete(sessions)
-          .where(eq(sessions.userId, inputs.id))
-          .returning({ id: sessions.id });
+        const deletedSessions = await db.session.deleteMany({
+          where: {
+            userId: inputs.id
+          }
+        });
         
-        sessionsDeleted = deletedSessions.length;
+        sessionsDeleted = deletedSessions.count;
         
         if (sessionsDeleted > 0) {
           ctx.logger.log(`Deleted ${sessionsDeleted} sessions for user: ${inputs.id}`);
@@ -168,21 +168,21 @@ export default class UserDelete extends NanoService<UserDeleteInputType> {
       }
 
       // Delete the user
-      const deletedUsers = await db
-        .delete(users)
-        .where(eq(users.id, inputs.id))
-        .returning({
-          id: users.id,
-          email: users.email,
-          name: users.name,
-          role: users.role
-        });
+      const deletedUser = await db.user.delete({
+        where: {
+          id: inputs.id
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true
+        }
+      });
 
-      if (deletedUsers.length === 0) {
+      if (!deletedUser) {
         throw new Error('Failed to delete user');
       }
-
-      const deletedUser = deletedUsers[0];
 
       const deletedUserData: DeletedUserType = {
         id: deletedUser.id,

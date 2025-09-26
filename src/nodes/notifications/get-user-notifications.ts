@@ -3,8 +3,6 @@ import { type Context, GlobalError } from "@nanoservice-ts/shared";
 import { type ParamsDictionary, type JsonLikeObject } from "@nanoservice-ts/runner";
 
 import { db } from "../../../database/config";
-import { notifications } from "../../../database/schemas/notifications";
-import { eq, desc, and, isNull, or, gt } from "drizzle-orm";
 
 interface GetUserNotificationsInput {
   userId: string;
@@ -188,60 +186,57 @@ export default class GetUserNotifications extends NanoService<GetUserNotificatio
       const unreadOnly = inputs.unreadOnly || false;
       const includeExpired = inputs.includeExpired || false;
 
-      // Build query conditions
-      const conditions = [eq(notifications.userId, inputs.userId)];
+      // Build query conditions for Prisma
+      const where: any = {
+        userId: inputs.userId
+      };
 
       // Filter by read status if requested
       if (unreadOnly) {
-        conditions.push(eq(notifications.isRead, false));
+        where.isRead = false;
       }
 
       // Filter out expired notifications unless requested
       if (!includeExpired) {
-        const now = new Date().toISOString();
-        conditions.push(
-          or(
-            isNull(notifications.expiresAt),
-            gt(notifications.expiresAt, now)
-          )!
-        );
+        const now = new Date();
+        where.OR = [
+          { expiresAt: null },
+          { expiresAt: { gt: now } }
+        ];
       }
 
       // Get notifications
-      const userNotifications = await db
-        .select()
-        .from(notifications)
-        .where(and(...conditions))
-        .orderBy(desc(notifications.createdAt))
-        .limit(limit)
-        .offset(offset);
+      const userNotifications = await db.notification.findMany({
+        where,
+        orderBy: {
+          createdAt: 'desc'
+        },
+        take: limit,
+        skip: offset
+      });
 
       // Get total count for pagination
-      const totalCount = await db
-        .select({ count: notifications.id })
-        .from(notifications)
-        .where(and(...conditions));
+      const totalCount = await db.notification.count({
+        where
+      });
 
       // Get unread count
-      const unreadConditions = [
-        eq(notifications.userId, inputs.userId),
-        eq(notifications.isRead, false),
-      ];
+      const unreadWhere: any = {
+        userId: inputs.userId,
+        isRead: false
+      };
       
       if (!includeExpired) {
-        const now = new Date().toISOString();
-        unreadConditions.push(
-          or(
-            isNull(notifications.expiresAt),
-            gt(notifications.expiresAt, now)
-          )!
-        );
+        const now = new Date();
+        unreadWhere.OR = [
+          { expiresAt: null },
+          { expiresAt: { gt: now } }
+        ];
       }
 
-      const unreadCount = await db
-        .select({ count: notifications.id })
-        .from(notifications)
-        .where(and(...unreadConditions));
+      const unreadCount = await db.notification.count({
+        where: unreadWhere
+      });
 
       // Format notifications
       const formattedNotifications = userNotifications.map(notification => ({
@@ -266,9 +261,9 @@ export default class GetUserNotifications extends NanoService<GetUserNotificatio
       if (ctx.vars === undefined) ctx.vars = {};
       ctx.vars.userNotifications = {
         notifications: formattedNotifications,
-        totalCount: totalCount.length,
-        unreadCount: unreadCount.length,
-        hasMore: (offset + limit) < totalCount.length,
+        totalCount: totalCount,
+        unreadCount: unreadCount,
+        hasMore: (offset + limit) < totalCount,
       } as unknown as ParamsDictionary;
 
       // Return success response
@@ -279,10 +274,10 @@ export default class GetUserNotifications extends NanoService<GetUserNotificatio
           pagination: {
             limit,
             offset,
-            totalCount: totalCount.length,
-            hasMore: (offset + limit) < totalCount.length,
+            totalCount: totalCount,
+            hasMore: (offset + limit) < totalCount,
           },
-          unreadCount: unreadCount.length,
+          unreadCount: unreadCount,
         },
         message: "Notifications retrieved successfully"
       } as unknown as JsonLikeObject);

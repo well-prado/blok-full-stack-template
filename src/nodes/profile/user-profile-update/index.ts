@@ -6,8 +6,6 @@ import {
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
 import bcrypt from "bcryptjs";
 import { db } from "../../../../database/config";
-import { eq } from "drizzle-orm";
-import { users } from "../../../../database/schemas";
 
 interface InputType {
   userId: string;
@@ -235,17 +233,15 @@ export default class UserProfileUpdate extends NanoService<InputType> {
       }
 
       // Get current user data
-      const existingUsers = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, userId))
-        .limit(1);
+      const existingUser = await db.user.findUnique({
+        where: {
+          id: userId
+        }
+      });
 
-      if (existingUsers.length === 0) {
+      if (!existingUser) {
         throw new Error("User not found");
       }
-
-      const existingUser = existingUsers[0];
       const updateData: UserUpdateData = {
         updatedAt: new Date().toISOString()
       };
@@ -259,13 +255,13 @@ export default class UserProfileUpdate extends NanoService<InputType> {
         }
 
         // Check if email is already taken
-        const emailExists = await db
-          .select()
-          .from(users)
-          .where(eq(users.email, email))
-          .limit(1);
+        const emailExists = await db.user.findUnique({
+          where: {
+            email: email
+          }
+        });
 
-        if (emailExists.length > 0) {
+        if (emailExists) {
           throw new Error("Email address is already in use");
         }
 
@@ -343,17 +339,16 @@ export default class UserProfileUpdate extends NanoService<InputType> {
       }
 
       // Perform the update
-      const updatedUsers = await db
-        .update(users)
-        .set(updateData)
-        .where(eq(users.id, userId))
-        .returning();
+      const updatedUser = await db.user.update({
+        where: {
+          id: userId
+        },
+        data: updateData
+      });
 
-      if (updatedUsers.length === 0) {
+      if (!updatedUser) {
         throw new Error("Failed to update user profile");
       }
-
-      const updatedUser = updatedUsers[0];
 
       // Return sanitized user data (without password hash)
       const sanitizedUser = {
@@ -364,8 +359,8 @@ export default class UserProfileUpdate extends NanoService<InputType> {
         emailVerified: updatedUser.emailVerified,
         profileImage: updatedUser.profileImage || "",
         preferences: updatedUser.preferences ? JSON.parse(updatedUser.preferences) : {},
-        createdAt: updatedUser.createdAt,
-        updatedAt: updatedUser.updatedAt
+        createdAt: updatedUser.createdAt.toISOString(),
+        updatedAt: updatedUser.updatedAt.toISOString()
       };
 
       response.setSuccess({

@@ -6,10 +6,8 @@ import {
   type ParamsDictionary,
 } from "@nanoservice-ts/runner";
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
-import { eq } from 'drizzle-orm';
 import * as bcrypt from 'bcryptjs';
 import { db } from '../../../../database/config';
-import { users, type NewUser } from '../../../../database/schemas';
 
 type UserRegisterInputType = {
   email: string;
@@ -199,13 +197,16 @@ export default class UserRegister extends NanoService<UserRegisterInputType> {
       ctx.logger.log(`Attempting to register user: ${inputs.email}`);
 
       // Check if user already exists
-      const existingUser = await db
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.email, inputs.email.toLowerCase()))
-        .limit(1);
+      const existingUser = await db.user.findUnique({
+        where: {
+          email: inputs.email.toLowerCase()
+        },
+        select: {
+          id: true
+        }
+      });
 
-      if (existingUser.length > 0) {
+      if (existingUser) {
         const result: UserRegisterOutputType = {
           success: false,
           message: 'User with this email already exists',
@@ -224,28 +225,27 @@ export default class UserRegister extends NanoService<UserRegisterInputType> {
       const hashedPassword = await bcrypt.hash(inputs.password, saltRounds);
 
       // Create new user
-      const newUser: NewUser = {
-        email: inputs.email.toLowerCase(),
-        passwordHash: hashedPassword,
-        name: inputs.name.trim(),
-        role: inputs.role || 'user',
-        emailVerified: false
-      };
-
-      const insertResult = await db.insert(users).values(newUser).returning({
-        id: users.id,
-        email: users.email,
-        name: users.name,
-        role: users.role,
-        emailVerified: users.emailVerified,
-        createdAt: users.createdAt
+      const createdUser = await db.user.create({
+        data: {
+          email: inputs.email.toLowerCase(),
+          passwordHash: hashedPassword,
+          name: inputs.name.trim(),
+          role: inputs.role === 'admin' ? 'ADMIN' : 'USER',
+          emailVerified: false
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          emailVerified: true,
+          createdAt: true
+        }
       });
 
-      if (insertResult.length === 0) {
+      if (!createdUser) {
         throw new Error('Failed to create user');
       }
-
-      const createdUser = insertResult[0];
 
       const userData: CreatedUserType = {
         id: createdUser.id,
@@ -253,7 +253,7 @@ export default class UserRegister extends NanoService<UserRegisterInputType> {
         name: createdUser.name,
         role: createdUser.role,
         emailVerified: createdUser.emailVerified,
-        createdAt: createdUser.createdAt
+        createdAt: createdUser.createdAt.toISOString()
       };
 
       const result: UserRegisterOutputType = {

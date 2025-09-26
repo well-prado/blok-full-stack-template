@@ -6,9 +6,7 @@ import {
   type ParamsDictionary,
 } from "@nanoservice-ts/runner";
 import { type Context, GlobalError } from "@nanoservice-ts/shared";
-import { eq } from 'drizzle-orm';
 import { db } from '../../../../database/config';
-import { sessions, users } from '../../../../database/schemas';
 
 type AuthenticationCheckerInputType = {
   requireAuth: boolean;
@@ -194,25 +192,29 @@ export default class AuthenticationChecker extends NanoService<AuthenticationChe
 
       ctx.logger.log('Session token found, verifying...');
 
-      // Look up the session in the database
-      const sessionResult = await db
-        .select({
-          sessionId: sessions.id,
-          sessionToken: sessions.token,
-          sessionExpiresAt: sessions.expiresAt,
-          sessionCreatedAt: sessions.createdAt,
-          userId: users.id,
-          userEmail: users.email,
-          userName: users.name,
-          userRole: users.role,
-          userEmailVerified: users.emailVerified,
-        })
-        .from(sessions)
-        .innerJoin(users, eq(sessions.userId, users.id))
-        .where(eq(sessions.token, sessionToken))
-        .limit(1);
+      // Look up the session in the database with user data
+      const sessionData = await db.session.findUnique({
+        where: {
+          token: sessionToken
+        },
+        select: {
+          id: true,
+          token: true,
+          expiresAt: true,
+          createdAt: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              role: true,
+              emailVerified: true
+            }
+          }
+        }
+      });
 
-      if (sessionResult.length === 0) {
+      if (!sessionData) {
         const result: AuthenticationCheckerOutputType = {
           isAuthenticated: false,
           message: 'Invalid session token',
@@ -227,17 +229,19 @@ export default class AuthenticationChecker extends NanoService<AuthenticationChe
         return response;
       }
 
-      const sessionData = sessionResult[0];
-
       // Check if session has expired
       const now = new Date();
-      const expiresAt = new Date(sessionData.sessionExpiresAt);
+      const expiresAt = new Date(sessionData.expiresAt);
 
       if (now > expiresAt) {
         ctx.logger.log('Session expired, cleaning up...');
 
         // Delete expired session
-        await db.delete(sessions).where(eq(sessions.id, sessionData.sessionId));
+        await db.session.delete({
+          where: {
+            id: sessionData.id
+          }
+        });
 
         const result: AuthenticationCheckerOutputType = {
           isAuthenticated: false,
@@ -255,16 +259,16 @@ export default class AuthenticationChecker extends NanoService<AuthenticationChe
 
       // Session is valid!
       const userData: UserDataType = {
-        id: sessionData.userId,
-        email: sessionData.userEmail,
-        name: sessionData.userName,
-        role: sessionData.userRole,
-        emailVerified: sessionData.userEmailVerified
+        id: sessionData.user.id,
+        email: sessionData.user.email,
+        name: sessionData.user.name,
+        role: sessionData.user.role,
+        emailVerified: sessionData.user.emailVerified
       };
 
       const sessionInfo: SessionDataType = {
-        id: sessionData.sessionId,
-        expiresAt: sessionData.sessionExpiresAt
+        id: sessionData.id,
+        expiresAt: sessionData.expiresAt.toISOString()
       };
 
       const result: AuthenticationCheckerOutputType = {
