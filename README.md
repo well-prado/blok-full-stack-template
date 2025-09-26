@@ -7,7 +7,7 @@ Complete Blok full-stack application with authentication, admin dashboard, and R
 - **Complete Authentication System** - Login, register, logout, session management
 - **Admin Dashboard** - User management, analytics, system monitoring
 - **React Frontend** - Modern UI with Shadcn components and Tailwind CSS
-- **Database Integration** - SQLite with Drizzle ORM
+- **Database Integration** - SQLite with Prisma ORM
 - **Email Services** - Multi-provider email system
 - **Security Features** - Password hashing, rate limiting, audit logs
 - **Type Safety** - Full TypeScript support with auto-generated types
@@ -51,7 +51,7 @@ Complete Blok full-stack application with authentication, admin dashboard, and R
 2. **Set up database:**
 
    ```bash
-   cd database && npx tsx migrate.ts && cd ..
+   npx prisma migrate dev --name init
    ```
 
 3. **Start development servers:**
@@ -113,7 +113,7 @@ NODE_ENV=development
 
 ### Database
 
-The project uses SQLite with Drizzle ORM. Database files are stored in the `database/` directory.
+The project uses SQLite with Prisma ORM. Database files are stored in the `database/` directory.
 
 To run migrations:
 

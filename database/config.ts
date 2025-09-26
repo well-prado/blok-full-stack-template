@@ -1,33 +1,26 @@
-import * as schema from './schemas';
-
-import { createClient } from '@libsql/client';
-import { drizzle } from 'drizzle-orm/libsql';
+import { PrismaClient } from '@prisma/client';
 import path from 'path';
 
-// Database file path - will be created in database/ folder
+// Determine the database path dynamically
 const dbPath = path.join(__dirname, 'app.db');
 
-// Create LibSQL client
-const client = createClient({
-  url: `file:${dbPath}`,
+// Create Prisma client instance
+export const db = new PrismaClient({
+  datasources: {
+    db: {
+      url: `file:${dbPath}`,
+    },
+  },
 });
 
-// Create Drizzle database instance
-export const db = drizzle(client, { schema });
-
-// Export the raw client for direct queries if needed
-export const rawClient = client;
-
-// Database configuration
+// Database configuration for migrations and other operations
 export const dbConfig = {
   path: dbPath,
-  mode: 'WAL',
-  timeout: 5000,
 };
 
 // Helper function to close database connection
-export const closeDb = () => {
-  client.close();
+export const closeDb = async () => {
+  await db.$disconnect();
 };
 
 export default db;

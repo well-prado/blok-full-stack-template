@@ -1,7 +1,7 @@
 {
   "name": "{{PROJECT_NAME}}",
   "version": "1.0.0",
-  "description": "Complete Blok full-stack application with authentication, admin dashboard, and React frontend",
+  "description": "{{PROJECT_NAME}} - Generated using blok-full-stack-template",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -21,7 +21,9 @@
     "build:frontend": "cd frontend && npm run build",
     "build:all": "npm run build && npm run build:frontend",
     "infra:dev": "rimraf ./dist && tsc && copyfiles -u 1 src/nodes/**/*.html src/nodes/**/*.md dist/ && docker compose --file ./infra/docker-compose.yml up --build --watch",
-    "infra:build": "tsc --watch -p tsconfig.json --diagnostics"
+    "infra:build": "tsc --watch -p tsconfig.json --diagnostics",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate dev --name init"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
@@ -34,9 +36,9 @@
     "@types/pg": "^8.11.11",
     "concurrently": "^9.2.1",
     "copyfiles": "^2.4.1",
-    "drizzle-kit": "^0.31.5",
     "esbuild": "^0.25.10",
     "nodemon": "^3.1.9",
+    "prisma": "^6.16.2",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.5",
@@ -44,11 +46,9 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.2.0",
-    "@libsql/client": "^0.15.15",
-    "@libsql/sqlite3": "^0.3.1",
     "@nanoservice-ts/api-call": "^0.1.29",
     "@nanoservice-ts/helper": "^0.1.5",
-    "@nanoservice-ts/if-else": "^0.0.30",
+    "@nanoservice-ts/if-else": "^0.0.33",
     "@nanoservice-ts/runner": "^0.1.26",
     "@nanoservice-ts/shared": "^0.0.9",
     "@opentelemetry/api": "^1.9.0",
@@ -58,17 +58,17 @@
     "@opentelemetry/sdk-trace-base": "^1.30.1",
     "@opentelemetry/sdk-trace-web": "^1.30.1",
     "@opentelemetry/semantic-conventions": "^1.30.0",
+    "@prisma/client": "^6.16.2",
     "@tanstack/react-query": "^5.90.2",
     "@types/cookie-parser": "^1.4.9",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
-    "@well-prado/blok-admin-dashboard": "latest",
+    "@well-prado/blok-admin-dashboard": "^1.0.7",
     "ai": "^5.0.54",
     "bcryptjs": "^3.0.2",
     "body-parser": "1.20.3",
     "cookie-parser": "^1.4.7",
     "cors": "2.8.5",
-    "drizzle-orm": "^0.44.5",
     "ejs": "^3.1.10",
     "express": "4.21.2",
     "jsondiffpatch": "^0.7.2",
@@ -78,10 +78,6 @@
     "react-dom": "^19.1.1",
     "uuid": "^11.1.0",
     "zod": "^3.24.2"
-  },
-  "overrides": {
-    "esbuild": "^0.25.10",
-    "jsondiffpatch": "^0.7.2"
   },
   "private": true
 }

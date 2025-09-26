@@ -1,41 +1,42 @@
 {
-	"compilerOptions": {
-		"target": "ES2022",
-		"module": "CommonJS",
-		"rootDir": ".",
-		"baseUrl": ".",
-		"paths": {
-			"@nodes/*": ["./src/nodes/*"],
-			"@src/*": ["src/*"]
-		},
-		"allowJs": true,
-		"declaration": true,
-		"sourceMap": true,
-		"outDir": "./dist",
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"strict": true,
-		"noUnusedLocals": true,
-		"noImplicitReturns": true,
-		"skipLibCheck": true,
-		"resolveJsonModule": true,
-		"jsx": "react-jsx",
-		"lib": ["ES2022", "DOM", "DOM.Iterable"]
-	},
-	"compileOnSave": true,
-	"include": [
-		"./src",
-		"./database",
-		"./src/nodes/**/*.json",
-		"./src/nodes/**/*.md",
-		"./src/*.json",
-		"./src/nodes/**/*.jsx",
-		"./src/nodes/**/*.tsx"
-	],
-	"exclude": [
-		"src/nodes/**/test/*.ts",
-		"node_modules",
-		"frontend/**/*",
-		"**/*.config.js"
-	]
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@nodes/*": ["./src/nodes/*"],
+      "@src/*": ["src/*"]
+    },
+    "allowJs": true,
+    "declaration": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+  },
+  "compileOnSave": true,
+  "include": [
+    "./src",
+    "./database",
+    "./src/nodes/**/*.json",
+    "./src/nodes/**/*.md",
+    "./src/*.json",
+    "./src/nodes/**/*.jsx",
+    "./src/nodes/**/*.tsx"
+  ],
+  "exclude": [
+    "src/nodes/**/test/*.ts",
+    "node_modules",
+    "frontend/**/*",
+    "**/*.config.js",
+    "database/generated/**/*"
+  ]
 }
