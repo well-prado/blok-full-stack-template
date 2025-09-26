@@ -239,7 +239,7 @@ export default class GetUserNotifications extends NanoService<GetUserNotificatio
       });
 
       // Format notifications
-      const formattedNotifications = userNotifications.map(notification => ({
+      const formattedNotifications = userNotifications.map((notification: { id: string; title: string; message: string; type: string; priority: string; readAt: Date | null; createdAt: Date; expiresAt: Date | null; actionUrl: string | null; actionLabel: string | null }) => ({
         id: notification.id,
         title: notification.title,
         message: notification.message,

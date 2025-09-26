@@ -397,7 +397,7 @@ export default class SystemActionLogger extends NanoService<InputType> {
     const total = totalCount;
 
     // Parse JSON fields
-    const parsedLogs = logs.map(log => ({
+    const parsedLogs = logs.map((log: { id: string; userId: string; userEmail: string; userName: string; userRole: string; action: string; actionType: string; resourceType: string; resourceId: string | null; resourceName: string | null; httpMethod: string; endpoint: string; ipAddress: string; userAgent: string; details: string | null; changesSummary: string | null; workflowName: string | null; nodeName: string | null; executionTimeMs: number | null; statusCode: number; success: boolean | null; riskLevel: string; complianceFlags: string | null; createdAt: Date }) => ({
       ...log,
       changesSummary: log.changesSummary ? JSON.parse(log.changesSummary) : null,
       complianceFlags: log.complianceFlags ? JSON.parse(log.complianceFlags) : []

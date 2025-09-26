@@ -269,7 +269,7 @@ export default class UserList extends NanoService<UserListInputType> {
       });
 
       // Map results to proper type
-      const userList: ListedUserType[] = userResults.map(user => ({
+      const userList: ListedUserType[] = userResults.map((user: { id: string; email: string; name: string; role: string; emailVerified: boolean; createdAt: Date; updatedAt: Date }) => ({
         id: user.id,
         email: user.email,
         name: user.name,

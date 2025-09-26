@@ -209,7 +209,7 @@ export default class AuditLogger extends NanoService<InputType> {
     const total = totalCount;
 
     // Parse details field for each log
-    const parsedLogs = logs.map(log => ({
+    const parsedLogs = logs.map((log: { id: string; userId: string; action: string; resourceType: string; resourceId: string | null; details: string | null; ipAddress: string; userAgent: string; createdAt: Date }) => ({
       ...log,
       details: log.details ? JSON.parse(log.details) : null
     }));
@@ -239,14 +239,14 @@ export default class AuditLogger extends NanoService<InputType> {
     // Get activity statistics
     const stats = {
       totalEvents: recentLogs.length,
-      successfulEvents: recentLogs.filter(log => log.success).length,
-      failedEvents: recentLogs.filter(log => !log.success).length,
-      uniqueUsers: new Set(recentLogs.filter(log => log.userId).map(log => log.userId)).size,
+      successfulEvents: recentLogs.filter((log: any) => log.success).length,
+      failedEvents: recentLogs.filter((log: any) => !log.success).length,
+      uniqueUsers: new Set(recentLogs.filter((log: any) => log.userId).map((log: any) => log.userId)).size,
       topActions: this.getTopActions(recentLogs),
-      recentFailures: recentLogs.filter(log => !log.success).slice(0, 5)
+      recentFailures: recentLogs.filter((log: any) => !log.success).slice(0, 5)
     };
 
-    const parsedLogs = recentLogs.map(log => ({
+    const parsedLogs = recentLogs.map((log: { id: string; userId: string; action: string; resourceType: string; resourceId: string | null; details: string | null; ipAddress: string; userAgent: string; createdAt: Date; success?: boolean }) => ({
       ...log,
       details: log.details ? JSON.parse(log.details) : null
     }));
