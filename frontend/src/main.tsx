@@ -70,12 +70,6 @@ const blokConfig = {
   timeout: 30000,
 };
 
-const devOptions = {
-  enableValidation: true,
-  logRequests: true,
-  logErrors: true,
-};
-
 // Prevent multiple root creation during hot reloads
 const rootElement = document.getElementById("root")!;
 let root = (window as any).__reactRoot;
@@ -87,7 +81,7 @@ if (!root) {
 
 root.render(
   <React.StrictMode>
-    <BlokProvider config={blokConfig} devOptions={devOptions}>
+    <BlokProvider config={blokConfig}>
       <AuthProvider>
         <ThemeProvider>
           <AnimationProvider>
