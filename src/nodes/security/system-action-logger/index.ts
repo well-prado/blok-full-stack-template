@@ -65,7 +65,7 @@ interface NewSystemLog {
   executionTimeMs?: number;
   statusCode: number;
   success?: boolean;
-  riskLevel: string;
+  riskLevel: LogRiskLevel;
   complianceFlags?: string;
   createdAt?: Date;
 }

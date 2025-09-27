@@ -6,12 +6,87 @@ import {
 } from "@nanoservice-ts/runner";
 import { type Context } from "@nanoservice-ts/shared";
 import { db } from "../../../../database/config";
-import { 
-  type NewSystemLog, 
-  ActionType, 
-  LogRiskLevel, 
-  ResourceType 
-} from "../../../../database/schemas";
+// Local type definitions
+enum ActionType {
+  CREATE = 'CREATE',
+  READ = 'READ',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+  BULK_UPDATE = 'BULK_UPDATE',
+  BULK_DELETE = 'BULK_DELETE',
+  LOGIN = 'LOGIN',
+  LOGOUT = 'LOGOUT',
+  REGISTER = 'REGISTER',
+  RESET_PASSWORD = 'RESET_PASSWORD',
+  VERIFY_EMAIL = 'VERIFY_EMAIL',
+  CHANGE_PASSWORD = 'CHANGE_PASSWORD',
+  UPDATE_PROFILE = 'UPDATE_PROFILE',
+  UPLOAD_FILE = 'UPLOAD_FILE',
+  DELETE_FILE = 'DELETE_FILE',
+  EXPORT_DATA = 'EXPORT_DATA',
+  IMPORT_DATA = 'IMPORT_DATA',
+  BACKUP = 'BACKUP',
+  RESTORE = 'RESTORE',
+  SYSTEM_CONFIG = 'SYSTEM_CONFIG',
+  SECURITY_SCAN = 'SECURITY_SCAN',
+  AUDIT_LOG = 'AUDIT_LOG',
+  OTHER = 'OTHER'
+}
+
+enum LogRiskLevel {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL'
+}
+
+enum ResourceType {
+  USER = 'USER',
+  PROFILE = 'PROFILE',
+  SETTINGS = 'SETTINGS',
+  ROLE = 'ROLE',
+  SESSION = 'SESSION',
+  NOTIFICATION = 'NOTIFICATION',
+  FILE = 'FILE',
+  SYSTEM = 'SYSTEM',
+  DATABASE = 'DATABASE',
+  API = 'API',
+  WORKFLOW = 'WORKFLOW',
+  NODE = 'NODE',
+  LOG = 'LOG',
+  BACKUP = 'BACKUP',
+  CONFIG = 'CONFIG',
+  SECURITY = 'SECURITY',
+  AUDIT = 'AUDIT',
+  AUTH = 'AUTH',
+  OTHER = 'OTHER'
+}
+
+interface NewSystemLog {
+  userId: string;
+  userEmail: string;
+  userName: string;
+  userRole: string;
+  action: string;
+  actionType: string;
+  resourceType: string;
+  resourceId?: string;
+  resourceName?: string;
+  httpMethod: string;
+  endpoint: string;
+  ipAddress: string;
+  userAgent: string;
+  workflowName?: string;
+  nodeName?: string;
+  executionTimeMs?: number;
+  statusCode: number;
+  success: boolean;
+  riskLevel: LogRiskLevel;
+  complianceFlags?: string;
+  changesSummary?: string;
+  sessionId?: string;
+  affectedUsersCount?: number;
+}
 
 interface InputType {
   // Phase of the request lifecycle
@@ -255,8 +330,9 @@ export default class RequestInterceptor extends NanoService<InputType> {
         userEmail: contextData.userEmail,
         userName: contextData.userName,
         userRole: contextData.userRole,
-        actionType: inputs.actionType || this.inferActionType(contextData.httpMethod),
-        resourceType: inputs.resourceType || this.inferResourceType(contextData.endpoint),
+        action: (inputs.actionType || this.inferActionType(contextData.httpMethod)).toString(),
+        actionType: (inputs.actionType || this.inferActionType(contextData.httpMethod)).toString(),
+        resourceType: (inputs.resourceType || this.inferResourceType(contextData.endpoint)).toString(),
         resourceId: inputs.resourceId || this.extractResourceId(contextData.endpoint, contextData.requestBody),
         resourceName: inputs.resourceName || this.extractResourceName(contextData.requestBody, contextData.responseData),
         httpMethod: contextData.httpMethod,
@@ -265,15 +341,13 @@ export default class RequestInterceptor extends NanoService<InputType> {
         nodeName: contextData.nodeName,
         statusCode: contextData.statusCode,
         success: contextData.success,
-        errorMessage: contextData.errorMessage || null,
         executionTimeMs: ctx.vars?.requestStartTime ? 
-          Date.now() - (ctx.vars.requestStartTime as unknown as number) : null,
-        requestSize: contextData.requestBody ? JSON.stringify(contextData.requestBody).length : null,
+          Date.now() - (ctx.vars.requestStartTime as unknown as number) : undefined,
         changesSummary: this.extractChangesSummary(contextData.requestBody, contextData.responseData) ? 
-          JSON.stringify(this.extractChangesSummary(contextData.requestBody, contextData.responseData)) : null,
+          JSON.stringify(this.extractChangesSummary(contextData.requestBody, contextData.responseData)) : undefined,
         ipAddress: contextData.ipAddress,
-        userAgent: contextData.userAgent || null,
-        sessionId: contextData.sessionId || null,
+        userAgent: contextData.userAgent || '',
+        sessionId: contextData.sessionId || undefined,
         affectedUsersCount: this.countAffectedUsers(contextData.requestBody, contextData.responseData) || 0,
         complianceFlags: JSON.stringify(['audit_trail', 'blame_tracking', 'enterprise_logging']),
         riskLevel: inputs.riskLevel || this.assessRiskLevel(contextData)

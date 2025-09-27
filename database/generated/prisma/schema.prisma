@@ -86,6 +86,9 @@ model Notification {
   priority       Priority         @default(MEDIUM)
   isRead         Boolean          @default(false) @map("is_read")
   readAt         DateTime?        @map("read_at")
+  actionUrl      String?          @map("action_url")
+  actionLabel    String?          @map("action_label")
+  category       String?
   metadata       String? // JSON string for additional data
   sourceWorkflow String?          @map("source_workflow")
   sourceNode     String?          @map("source_node")
@@ -104,6 +107,7 @@ model AuditLog {
   userId       String?  @map("user_id")
   action       String
   resource     String?
+  resourceType String?  @map("resource_type")
   resourceId   String?  @map("resource_id")
   details      String? // JSON string
   ipAddress    String?  @map("ip_address")

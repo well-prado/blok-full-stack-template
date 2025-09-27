@@ -108,35 +108,22 @@ export default class ThemePreferenceUpdate extends NanoService<ThemePreferenceUp
     const response = new NanoServiceResponse();
 
     try {
-      // Import database dependencies
-      const { drizzle } = await import("drizzle-orm/libsql");
-      const { createClient } = await import("@libsql/client");
-      const { eq } = await import("drizzle-orm");
-      const { users } = await import("../../../database/schemas/users");
-
-      // Create database connection
-      const client = createClient({
-        url: "file:./database/app.db",
-        authToken: process.env.DATABASE_AUTH_TOKEN,
-      });
-
-      const db = drizzle(client);
+      // Import database config
+      const { db } = await import("../../../database/config");
 
       // Get current user preferences
-      const currentUser = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, inputs.userId))
-        .limit(1);
+      const currentUser = await db.user.findUnique({
+        where: { id: inputs.userId }
+      });
 
-      if (currentUser.length === 0) {
+      if (!currentUser) {
         throw new Error("User not found");
       }
 
       // Parse existing preferences or create new ones
       let preferences = {};
       try {
-        preferences = currentUser[0].preferences ? JSON.parse(currentUser[0].preferences) : {};
+        preferences = currentUser.preferences ? JSON.parse(currentUser.preferences) : {};
       } catch (error) {
         preferences = {};
       }
@@ -152,13 +139,13 @@ export default class ThemePreferenceUpdate extends NanoService<ThemePreferenceUp
       };
 
       // Update user preferences in database
-      await db
-        .update(users)
-        .set({
+      await db.user.update({
+        where: { id: inputs.userId },
+        data: {
           preferences: JSON.stringify(updatedPreferences),
-          updatedAt: new Date().toISOString()
-        })
-        .where(eq(users.id, inputs.userId));
+          updatedAt: new Date()
+        }
+      });
 
       // Store result in context
       if (ctx.vars === undefined) ctx.vars = {};

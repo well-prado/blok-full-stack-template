@@ -7,9 +7,6 @@
  * @module FrontendServer
  */
 
-import { and, eq, gt } from "drizzle-orm";
-import { sessions, users } from "../database/schemas";
-
 import { db } from "../database/config";
 import express from "express";
 import fs from "fs";
@@ -101,7 +98,7 @@ function extractRouteParams(path: string): Record<string, string> {
  * Get dashboard-specific props
  */
 async function getDashboardProps(user: any): Promise<Record<string, any>> {
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== 'ADMIN') {
     return { error: 'Unauthorized' };
   }
 
@@ -128,7 +125,7 @@ async function getDashboardProps(user: any): Promise<Record<string, any>> {
  * Get users page props
  */
 async function getUsersProps(user: any, req: express.Request): Promise<Record<string, any>> {
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== 'ADMIN') {
     return { error: 'Unauthorized' };
   }
 
@@ -163,7 +160,7 @@ async function getAnalyticsProps(user: any): Promise<Record<string, any>> {
  * Get logs props (admin only)
  */
 async function getLogsProps(user: any): Promise<Record<string, any>> {
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== 'ADMIN') {
     return { error: 'Unauthorized. Admin access required for system logs.' };
   }
 
@@ -260,36 +257,24 @@ async function getAuthenticatedUser(req: express.Request): Promise<any | null> {
       return null;
     }
 
-    // Look up the session in the database
-    const sessionResult = await db
-      .select({
-        userId: sessions.userId,
-        expiresAt: sessions.expiresAt,
-        user: {
-          id: users.id,
-          email: users.email,
-          name: users.name,
-          role: users.role,
-          emailVerified: users.emailVerified,
-          profileImage: users.profileImage,
-          preferences: users.preferences
+    // Look up the session in the database using Prisma
+    const session = await db.session.findFirst({
+      where: {
+        token: sessionToken,
+        expiresAt: {
+          gt: new Date()
         }
-      })
-      .from(sessions)
-      .innerJoin(users, eq(sessions.userId, users.id))
-      .where(
-        and(
-          eq(sessions.token, sessionToken),
-          gt(sessions.expiresAt, new Date().toISOString())
-        )
-      )
-      .limit(1);
+      },
+      include: {
+        user: true
+      }
+    });
 
-    if (sessionResult.length === 0) {
+    if (!session) {
       return null;
     }
 
-    const user = sessionResult[0].user;
+    const user = session.user;
     
     // Parse preferences JSON if it exists
     let preferences = {};
@@ -358,7 +343,7 @@ router.get("*", async (req, res, next) => {
           auth: {
             user: user,
             isAuthenticated: !!user,
-            isAdmin: user?.role === 'admin',
+            isAdmin: user?.role === 'ADMIN',
           },
           url: req.originalUrl,
           version: generatePageVersion(),

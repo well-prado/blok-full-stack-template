@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from './generated/prisma';
 import path from 'path';
 
 // Determine the database path dynamically

@@ -3780,6 +3780,9 @@ export namespace Prisma {
     priority: $Enums.Priority | null
     isRead: boolean | null
     readAt: Date | null
+    actionUrl: string | null
+    actionLabel: string | null
+    category: string | null
     metadata: string | null
     sourceWorkflow: string | null
     sourceNode: string | null
@@ -3796,6 +3799,9 @@ export namespace Prisma {
     priority: $Enums.Priority | null
     isRead: boolean | null
     readAt: Date | null
+    actionUrl: string | null
+    actionLabel: string | null
+    category: string | null
     metadata: string | null
     sourceWorkflow: string | null
     sourceNode: string | null
@@ -3812,6 +3818,9 @@ export namespace Prisma {
     priority: number
     isRead: number
     readAt: number
+    actionUrl: number
+    actionLabel: number
+    category: number
     metadata: number
     sourceWorkflow: number
     sourceNode: number
@@ -3830,6 +3839,9 @@ export namespace Prisma {
     priority?: true
     isRead?: true
     readAt?: true
+    actionUrl?: true
+    actionLabel?: true
+    category?: true
     metadata?: true
     sourceWorkflow?: true
     sourceNode?: true
@@ -3846,6 +3858,9 @@ export namespace Prisma {
     priority?: true
     isRead?: true
     readAt?: true
+    actionUrl?: true
+    actionLabel?: true
+    category?: true
     metadata?: true
     sourceWorkflow?: true
     sourceNode?: true
@@ -3862,6 +3877,9 @@ export namespace Prisma {
     priority?: true
     isRead?: true
     readAt?: true
+    actionUrl?: true
+    actionLabel?: true
+    category?: true
     metadata?: true
     sourceWorkflow?: true
     sourceNode?: true
@@ -3951,6 +3969,9 @@ export namespace Prisma {
     priority: $Enums.Priority
     isRead: boolean
     readAt: Date | null
+    actionUrl: string | null
+    actionLabel: string | null
+    category: string | null
     metadata: string | null
     sourceWorkflow: string | null
     sourceNode: string | null
@@ -3984,6 +4005,9 @@ export namespace Prisma {
     priority?: boolean
     isRead?: boolean
     readAt?: boolean
+    actionUrl?: boolean
+    actionLabel?: boolean
+    category?: boolean
     metadata?: boolean
     sourceWorkflow?: boolean
     sourceNode?: boolean
@@ -4001,6 +4025,9 @@ export namespace Prisma {
     priority?: boolean
     isRead?: boolean
     readAt?: boolean
+    actionUrl?: boolean
+    actionLabel?: boolean
+    category?: boolean
     metadata?: boolean
     sourceWorkflow?: boolean
     sourceNode?: boolean
@@ -4018,6 +4045,9 @@ export namespace Prisma {
     priority?: boolean
     isRead?: boolean
     readAt?: boolean
+    actionUrl?: boolean
+    actionLabel?: boolean
+    category?: boolean
     metadata?: boolean
     sourceWorkflow?: boolean
     sourceNode?: boolean
@@ -4035,6 +4065,9 @@ export namespace Prisma {
     priority?: boolean
     isRead?: boolean
     readAt?: boolean
+    actionUrl?: boolean
+    actionLabel?: boolean
+    category?: boolean
     metadata?: boolean
     sourceWorkflow?: boolean
     sourceNode?: boolean
@@ -4042,7 +4075,7 @@ export namespace Prisma {
     createdAt?: boolean
   }
 
-  export type NotificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "title" | "message" | "type" | "priority" | "isRead" | "readAt" | "metadata" | "sourceWorkflow" | "sourceNode" | "expiresAt" | "createdAt", ExtArgs["result"]["notification"]>
+  export type NotificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "title" | "message" | "type" | "priority" | "isRead" | "readAt" | "actionUrl" | "actionLabel" | "category" | "metadata" | "sourceWorkflow" | "sourceNode" | "expiresAt" | "createdAt", ExtArgs["result"]["notification"]>
   export type NotificationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -4067,6 +4100,9 @@ export namespace Prisma {
       priority: $Enums.Priority
       isRead: boolean
       readAt: Date | null
+      actionUrl: string | null
+      actionLabel: string | null
+      category: string | null
       metadata: string | null
       sourceWorkflow: string | null
       sourceNode: string | null
@@ -4504,6 +4540,9 @@ export namespace Prisma {
     readonly priority: FieldRef<"Notification", 'Priority'>
     readonly isRead: FieldRef<"Notification", 'Boolean'>
     readonly readAt: FieldRef<"Notification", 'DateTime'>
+    readonly actionUrl: FieldRef<"Notification", 'String'>
+    readonly actionLabel: FieldRef<"Notification", 'String'>
+    readonly category: FieldRef<"Notification", 'String'>
     readonly metadata: FieldRef<"Notification", 'String'>
     readonly sourceWorkflow: FieldRef<"Notification", 'String'>
     readonly sourceNode: FieldRef<"Notification", 'String'>
@@ -4936,6 +4975,7 @@ export namespace Prisma {
     userId: string | null
     action: string | null
     resource: string | null
+    resourceType: string | null
     resourceId: string | null
     details: string | null
     ipAddress: string | null
@@ -4950,6 +4990,7 @@ export namespace Prisma {
     userId: string | null
     action: string | null
     resource: string | null
+    resourceType: string | null
     resourceId: string | null
     details: string | null
     ipAddress: string | null
@@ -4964,6 +5005,7 @@ export namespace Prisma {
     userId: number
     action: number
     resource: number
+    resourceType: number
     resourceId: number
     details: number
     ipAddress: number
@@ -4980,6 +5022,7 @@ export namespace Prisma {
     userId?: true
     action?: true
     resource?: true
+    resourceType?: true
     resourceId?: true
     details?: true
     ipAddress?: true
@@ -4994,6 +5037,7 @@ export namespace Prisma {
     userId?: true
     action?: true
     resource?: true
+    resourceType?: true
     resourceId?: true
     details?: true
     ipAddress?: true
@@ -5008,6 +5052,7 @@ export namespace Prisma {
     userId?: true
     action?: true
     resource?: true
+    resourceType?: true
     resourceId?: true
     details?: true
     ipAddress?: true
@@ -5095,6 +5140,7 @@ export namespace Prisma {
     userId: string | null
     action: string
     resource: string | null
+    resourceType: string | null
     resourceId: string | null
     details: string | null
     ipAddress: string | null
@@ -5126,6 +5172,7 @@ export namespace Prisma {
     userId?: boolean
     action?: boolean
     resource?: boolean
+    resourceType?: boolean
     resourceId?: boolean
     details?: boolean
     ipAddress?: boolean
@@ -5140,6 +5187,7 @@ export namespace Prisma {
     userId?: boolean
     action?: boolean
     resource?: boolean
+    resourceType?: boolean
     resourceId?: boolean
     details?: boolean
     ipAddress?: boolean
@@ -5154,6 +5202,7 @@ export namespace Prisma {
     userId?: boolean
     action?: boolean
     resource?: boolean
+    resourceType?: boolean
     resourceId?: boolean
     details?: boolean
     ipAddress?: boolean
@@ -5168,6 +5217,7 @@ export namespace Prisma {
     userId?: boolean
     action?: boolean
     resource?: boolean
+    resourceType?: boolean
     resourceId?: boolean
     details?: boolean
     ipAddress?: boolean
@@ -5177,7 +5227,7 @@ export namespace Prisma {
     createdAt?: boolean
   }
 
-  export type AuditLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "action" | "resource" | "resourceId" | "details" | "ipAddress" | "userAgent" | "success" | "errorMessage" | "createdAt", ExtArgs["result"]["auditLog"]>
+  export type AuditLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "action" | "resource" | "resourceType" | "resourceId" | "details" | "ipAddress" | "userAgent" | "success" | "errorMessage" | "createdAt", ExtArgs["result"]["auditLog"]>
 
   export type $AuditLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "AuditLog"
@@ -5187,6 +5237,7 @@ export namespace Prisma {
       userId: string | null
       action: string
       resource: string | null
+      resourceType: string | null
       resourceId: string | null
       details: string | null
       ipAddress: string | null
@@ -5621,6 +5672,7 @@ export namespace Prisma {
     readonly userId: FieldRef<"AuditLog", 'String'>
     readonly action: FieldRef<"AuditLog", 'String'>
     readonly resource: FieldRef<"AuditLog", 'String'>
+    readonly resourceType: FieldRef<"AuditLog", 'String'>
     readonly resourceId: FieldRef<"AuditLog", 'String'>
     readonly details: FieldRef<"AuditLog", 'String'>
     readonly ipAddress: FieldRef<"AuditLog", 'String'>
@@ -9370,6 +9422,9 @@ export namespace Prisma {
     priority: 'priority',
     isRead: 'isRead',
     readAt: 'readAt',
+    actionUrl: 'actionUrl',
+    actionLabel: 'actionLabel',
+    category: 'category',
     metadata: 'metadata',
     sourceWorkflow: 'sourceWorkflow',
     sourceNode: 'sourceNode',
@@ -9385,6 +9440,7 @@ export namespace Prisma {
     userId: 'userId',
     action: 'action',
     resource: 'resource',
+    resourceType: 'resourceType',
     resourceId: 'resourceId',
     details: 'details',
     ipAddress: 'ipAddress',
@@ -9703,6 +9759,9 @@ export namespace Prisma {
     priority?: EnumPriorityFilter<"Notification"> | $Enums.Priority
     isRead?: BoolFilter<"Notification"> | boolean
     readAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
+    actionUrl?: StringNullableFilter<"Notification"> | string | null
+    actionLabel?: StringNullableFilter<"Notification"> | string | null
+    category?: StringNullableFilter<"Notification"> | string | null
     metadata?: StringNullableFilter<"Notification"> | string | null
     sourceWorkflow?: StringNullableFilter<"Notification"> | string | null
     sourceNode?: StringNullableFilter<"Notification"> | string | null
@@ -9720,6 +9779,9 @@ export namespace Prisma {
     priority?: SortOrder
     isRead?: SortOrder
     readAt?: SortOrderInput | SortOrder
+    actionUrl?: SortOrderInput | SortOrder
+    actionLabel?: SortOrderInput | SortOrder
+    category?: SortOrderInput | SortOrder
     metadata?: SortOrderInput | SortOrder
     sourceWorkflow?: SortOrderInput | SortOrder
     sourceNode?: SortOrderInput | SortOrder
@@ -9740,6 +9802,9 @@ export namespace Prisma {
     priority?: EnumPriorityFilter<"Notification"> | $Enums.Priority
     isRead?: BoolFilter<"Notification"> | boolean
     readAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
+    actionUrl?: StringNullableFilter<"Notification"> | string | null
+    actionLabel?: StringNullableFilter<"Notification"> | string | null
+    category?: StringNullableFilter<"Notification"> | string | null
     metadata?: StringNullableFilter<"Notification"> | string | null
     sourceWorkflow?: StringNullableFilter<"Notification"> | string | null
     sourceNode?: StringNullableFilter<"Notification"> | string | null
@@ -9757,6 +9822,9 @@ export namespace Prisma {
     priority?: SortOrder
     isRead?: SortOrder
     readAt?: SortOrderInput | SortOrder
+    actionUrl?: SortOrderInput | SortOrder
+    actionLabel?: SortOrderInput | SortOrder
+    category?: SortOrderInput | SortOrder
     metadata?: SortOrderInput | SortOrder
     sourceWorkflow?: SortOrderInput | SortOrder
     sourceNode?: SortOrderInput | SortOrder
@@ -9779,6 +9847,9 @@ export namespace Prisma {
     priority?: EnumPriorityWithAggregatesFilter<"Notification"> | $Enums.Priority
     isRead?: BoolWithAggregatesFilter<"Notification"> | boolean
     readAt?: DateTimeNullableWithAggregatesFilter<"Notification"> | Date | string | null
+    actionUrl?: StringNullableWithAggregatesFilter<"Notification"> | string | null
+    actionLabel?: StringNullableWithAggregatesFilter<"Notification"> | string | null
+    category?: StringNullableWithAggregatesFilter<"Notification"> | string | null
     metadata?: StringNullableWithAggregatesFilter<"Notification"> | string | null
     sourceWorkflow?: StringNullableWithAggregatesFilter<"Notification"> | string | null
     sourceNode?: StringNullableWithAggregatesFilter<"Notification"> | string | null
@@ -9794,6 +9865,7 @@ export namespace Prisma {
     userId?: StringNullableFilter<"AuditLog"> | string | null
     action?: StringFilter<"AuditLog"> | string
     resource?: StringNullableFilter<"AuditLog"> | string | null
+    resourceType?: StringNullableFilter<"AuditLog"> | string | null
     resourceId?: StringNullableFilter<"AuditLog"> | string | null
     details?: StringNullableFilter<"AuditLog"> | string | null
     ipAddress?: StringNullableFilter<"AuditLog"> | string | null
@@ -9808,6 +9880,7 @@ export namespace Prisma {
     userId?: SortOrderInput | SortOrder
     action?: SortOrder
     resource?: SortOrderInput | SortOrder
+    resourceType?: SortOrderInput | SortOrder
     resourceId?: SortOrderInput | SortOrder
     details?: SortOrderInput | SortOrder
     ipAddress?: SortOrderInput | SortOrder
@@ -9825,6 +9898,7 @@ export namespace Prisma {
     userId?: StringNullableFilter<"AuditLog"> | string | null
     action?: StringFilter<"AuditLog"> | string
     resource?: StringNullableFilter<"AuditLog"> | string | null
+    resourceType?: StringNullableFilter<"AuditLog"> | string | null
     resourceId?: StringNullableFilter<"AuditLog"> | string | null
     details?: StringNullableFilter<"AuditLog"> | string | null
     ipAddress?: StringNullableFilter<"AuditLog"> | string | null
@@ -9839,6 +9913,7 @@ export namespace Prisma {
     userId?: SortOrderInput | SortOrder
     action?: SortOrder
     resource?: SortOrderInput | SortOrder
+    resourceType?: SortOrderInput | SortOrder
     resourceId?: SortOrderInput | SortOrder
     details?: SortOrderInput | SortOrder
     ipAddress?: SortOrderInput | SortOrder
@@ -9859,6 +9934,7 @@ export namespace Prisma {
     userId?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
     action?: StringWithAggregatesFilter<"AuditLog"> | string
     resource?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
+    resourceType?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
     resourceId?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
     details?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
     ipAddress?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
@@ -10316,6 +10392,9 @@ export namespace Prisma {
     priority?: $Enums.Priority
     isRead?: boolean
     readAt?: Date | string | null
+    actionUrl?: string | null
+    actionLabel?: string | null
+    category?: string | null
     metadata?: string | null
     sourceWorkflow?: string | null
     sourceNode?: string | null
@@ -10333,6 +10412,9 @@ export namespace Prisma {
     priority?: $Enums.Priority
     isRead?: boolean
     readAt?: Date | string | null
+    actionUrl?: string | null
+    actionLabel?: string | null
+    category?: string | null
     metadata?: string | null
     sourceWorkflow?: string | null
     sourceNode?: string | null
@@ -10348,6 +10430,9 @@ export namespace Prisma {
     priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    actionLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableStringFieldUpdateOperationsInput | string | null
     sourceWorkflow?: NullableStringFieldUpdateOperationsInput | string | null
     sourceNode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10365,6 +10450,9 @@ export namespace Prisma {
     priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    actionLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableStringFieldUpdateOperationsInput | string | null
     sourceWorkflow?: NullableStringFieldUpdateOperationsInput | string | null
     sourceNode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10381,6 +10469,9 @@ export namespace Prisma {
     priority?: $Enums.Priority
     isRead?: boolean
     readAt?: Date | string | null
+    actionUrl?: string | null
+    actionLabel?: string | null
+    category?: string | null
     metadata?: string | null
     sourceWorkflow?: string | null
     sourceNode?: string | null
@@ -10396,6 +10487,9 @@ export namespace Prisma {
     priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    actionLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableStringFieldUpdateOperationsInput | string | null
     sourceWorkflow?: NullableStringFieldUpdateOperationsInput | string | null
     sourceNode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10412,6 +10506,9 @@ export namespace Prisma {
     priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    actionLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableStringFieldUpdateOperationsInput | string | null
     sourceWorkflow?: NullableStringFieldUpdateOperationsInput | string | null
     sourceNode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10424,6 +10521,7 @@ export namespace Prisma {
     userId?: string | null
     action: string
     resource?: string | null
+    resourceType?: string | null
     resourceId?: string | null
     details?: string | null
     ipAddress?: string | null
@@ -10438,6 +10536,7 @@ export namespace Prisma {
     userId?: string | null
     action: string
     resource?: string | null
+    resourceType?: string | null
     resourceId?: string | null
     details?: string | null
     ipAddress?: string | null
@@ -10452,6 +10551,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     action?: StringFieldUpdateOperationsInput | string
     resource?: NullableStringFieldUpdateOperationsInput | string | null
+    resourceType?: NullableStringFieldUpdateOperationsInput | string | null
     resourceId?: NullableStringFieldUpdateOperationsInput | string | null
     details?: NullableStringFieldUpdateOperationsInput | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10466,6 +10566,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     action?: StringFieldUpdateOperationsInput | string
     resource?: NullableStringFieldUpdateOperationsInput | string | null
+    resourceType?: NullableStringFieldUpdateOperationsInput | string | null
     resourceId?: NullableStringFieldUpdateOperationsInput | string | null
     details?: NullableStringFieldUpdateOperationsInput | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10480,6 +10581,7 @@ export namespace Prisma {
     userId?: string | null
     action: string
     resource?: string | null
+    resourceType?: string | null
     resourceId?: string | null
     details?: string | null
     ipAddress?: string | null
@@ -10494,6 +10596,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     action?: StringFieldUpdateOperationsInput | string
     resource?: NullableStringFieldUpdateOperationsInput | string | null
+    resourceType?: NullableStringFieldUpdateOperationsInput | string | null
     resourceId?: NullableStringFieldUpdateOperationsInput | string | null
     details?: NullableStringFieldUpdateOperationsInput | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10508,6 +10611,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     action?: StringFieldUpdateOperationsInput | string
     resource?: NullableStringFieldUpdateOperationsInput | string | null
+    resourceType?: NullableStringFieldUpdateOperationsInput | string | null
     resourceId?: NullableStringFieldUpdateOperationsInput | string | null
     details?: NullableStringFieldUpdateOperationsInput | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11085,6 +11189,9 @@ export namespace Prisma {
     priority?: SortOrder
     isRead?: SortOrder
     readAt?: SortOrder
+    actionUrl?: SortOrder
+    actionLabel?: SortOrder
+    category?: SortOrder
     metadata?: SortOrder
     sourceWorkflow?: SortOrder
     sourceNode?: SortOrder
@@ -11101,6 +11208,9 @@ export namespace Prisma {
     priority?: SortOrder
     isRead?: SortOrder
     readAt?: SortOrder
+    actionUrl?: SortOrder
+    actionLabel?: SortOrder
+    category?: SortOrder
     metadata?: SortOrder
     sourceWorkflow?: SortOrder
     sourceNode?: SortOrder
@@ -11117,6 +11227,9 @@ export namespace Prisma {
     priority?: SortOrder
     isRead?: SortOrder
     readAt?: SortOrder
+    actionUrl?: SortOrder
+    actionLabel?: SortOrder
+    category?: SortOrder
     metadata?: SortOrder
     sourceWorkflow?: SortOrder
     sourceNode?: SortOrder
@@ -11163,6 +11276,7 @@ export namespace Prisma {
     userId?: SortOrder
     action?: SortOrder
     resource?: SortOrder
+    resourceType?: SortOrder
     resourceId?: SortOrder
     details?: SortOrder
     ipAddress?: SortOrder
@@ -11177,6 +11291,7 @@ export namespace Prisma {
     userId?: SortOrder
     action?: SortOrder
     resource?: SortOrder
+    resourceType?: SortOrder
     resourceId?: SortOrder
     details?: SortOrder
     ipAddress?: SortOrder
@@ -11191,6 +11306,7 @@ export namespace Prisma {
     userId?: SortOrder
     action?: SortOrder
     resource?: SortOrder
+    resourceType?: SortOrder
     resourceId?: SortOrder
     details?: SortOrder
     ipAddress?: SortOrder
@@ -11890,6 +12006,9 @@ export namespace Prisma {
     priority?: $Enums.Priority
     isRead?: boolean
     readAt?: Date | string | null
+    actionUrl?: string | null
+    actionLabel?: string | null
+    category?: string | null
     metadata?: string | null
     sourceWorkflow?: string | null
     sourceNode?: string | null
@@ -11905,6 +12024,9 @@ export namespace Prisma {
     priority?: $Enums.Priority
     isRead?: boolean
     readAt?: Date | string | null
+    actionUrl?: string | null
+    actionLabel?: string | null
+    category?: string | null
     metadata?: string | null
     sourceWorkflow?: string | null
     sourceNode?: string | null
@@ -11976,6 +12098,9 @@ export namespace Prisma {
     priority?: EnumPriorityFilter<"Notification"> | $Enums.Priority
     isRead?: BoolFilter<"Notification"> | boolean
     readAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
+    actionUrl?: StringNullableFilter<"Notification"> | string | null
+    actionLabel?: StringNullableFilter<"Notification"> | string | null
+    category?: StringNullableFilter<"Notification"> | string | null
     metadata?: StringNullableFilter<"Notification"> | string | null
     sourceWorkflow?: StringNullableFilter<"Notification"> | string | null
     sourceNode?: StringNullableFilter<"Notification"> | string | null
@@ -12166,6 +12291,9 @@ export namespace Prisma {
     priority?: $Enums.Priority
     isRead?: boolean
     readAt?: Date | string | null
+    actionUrl?: string | null
+    actionLabel?: string | null
+    category?: string | null
     metadata?: string | null
     sourceWorkflow?: string | null
     sourceNode?: string | null
@@ -12202,6 +12330,9 @@ export namespace Prisma {
     priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    actionLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableStringFieldUpdateOperationsInput | string | null
     sourceWorkflow?: NullableStringFieldUpdateOperationsInput | string | null
     sourceNode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12217,6 +12348,9 @@ export namespace Prisma {
     priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    actionLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableStringFieldUpdateOperationsInput | string | null
     sourceWorkflow?: NullableStringFieldUpdateOperationsInput | string | null
     sourceNode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12232,6 +12366,9 @@ export namespace Prisma {
     priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    actionLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableStringFieldUpdateOperationsInput | string | null
     sourceWorkflow?: NullableStringFieldUpdateOperationsInput | string | null
     sourceNode?: NullableStringFieldUpdateOperationsInput | string | null

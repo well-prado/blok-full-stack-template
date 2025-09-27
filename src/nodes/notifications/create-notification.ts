@@ -3,7 +3,22 @@ import { type Context, GlobalError } from "@nanoservice-ts/shared";
 import { type ParamsDictionary, type JsonLikeObject } from "@nanoservice-ts/runner";
 
 import { db } from "../../../database/config";
-import { type CreateNotificationPayload } from "../../../database/schemas/notifications";
+
+// Local type definition for notification creation
+interface CreateNotificationPayload {
+  userId: string;
+  title: string;
+  message: string;
+  type?: string;
+  priority?: string;
+  actionUrl?: string;
+  actionLabel?: string;
+  category?: string;
+  metadata?: any;
+  sourceWorkflow?: string;
+  sourceNode?: string;
+  expiresAt?: string;
+}
 
 interface CreateNotificationInput {
   userId: string;
