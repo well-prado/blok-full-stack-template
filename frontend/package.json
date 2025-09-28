@@ -1,5 +1,5 @@
 {
-  "name": "{{project-name}}-frontend",
+  "name": "{{PROJECT_NAME}}-frontend",
   "version": "1.0.0",
   "description": "Modern React template with React 19, Tailwind CSS v4, and Shadcn UI",
   "type": "module",

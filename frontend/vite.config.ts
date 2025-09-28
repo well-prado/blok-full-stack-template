@@ -182,6 +182,7 @@ export default defineConfig({
     hmr: {
       port: 5173,
       host: 'localhost',
+      clientPort: 5173, // Force client to use port 5173
     }
   }
 })
