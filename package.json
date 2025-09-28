@@ -63,7 +63,7 @@
     "@types/cookie-parser": "^1.4.9",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
-    "@well-prado/blok-admin-dashboard": "^1.0.7",
+    "@well-prado/blok-admin-dashboard": "^1.0.12",
     "ai": "^5.0.54",
     "bcryptjs": "^3.0.2",
     "body-parser": "1.20.3",
