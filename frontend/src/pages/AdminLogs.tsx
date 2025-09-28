@@ -56,7 +56,7 @@ import { Label } from "../components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "../contexts/AuthContext";
 import { useBlokRouter } from "../hooks/useBlokRouter";
-import { useWorkflowQuery } from "../blok-types";
+import { useWorkflowQuery, type AdminLogsOutput } from "../blok-types";
 
 // TypeScript interfaces based on our backend schema
 interface SystemLog {
@@ -162,11 +162,16 @@ export default function AdminLogsPage() {
       }),
       ...(filters.filterSuccess && { filterSuccess: filters.filterSuccess }),
     },
-    enabled: isAuthenticated && user?.role === "admin",
-  });
+    enabled: isAuthenticated && user?.role === "ADMIN",
+  }) as {
+    data?: AdminLogsOutput;
+    isLoading: boolean;
+    error?: any;
+    refetch: () => void;
+  };
 
   // Redirect if not authenticated or not admin
-  if (!isAuthenticated || user?.role !== "admin") {
+  if (!isAuthenticated || user?.role !== "ADMIN") {
     router.push("/dashboard");
     return null;
   }

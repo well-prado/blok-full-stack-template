@@ -38,7 +38,7 @@ import { Switch } from "../components/ui/switch";
 import { toast } from "sonner";
 import { useAuth } from "../contexts/AuthContext";
 import { useBlokRouter } from "../hooks/useBlokRouter";
-import { useWorkflowMutation } from "../blok-types";
+import { useWorkflowMutation, type TwoFactorAuthOutput } from "../blok-types";
 
 interface SecurityLog {
   id: string;
@@ -72,7 +72,7 @@ export default function SecurityPage() {
   // SDK hooks for security operations
   const twoFactorAuthMutation = useWorkflowMutation({
     workflowName: "two-factor-auth",
-    onSuccess: (data) => {
+    onSuccess: (data: TwoFactorAuthOutput) => {
       if (data.success) {
         toast.success("Two-factor authentication updated successfully!");
         setLoading(false);
@@ -87,34 +87,45 @@ export default function SecurityPage() {
   // Note: audit-logs workflow is not available, so we'll keep the fetch call for now
   // This would need to be implemented in the backend
 
-  // Redirect if not authenticated
+  useEffect(() => {
+    loadSecurityData();
+  }, [user?.role]); // Reload when user role changes
+
+  // Redirect if not authenticated (after all hooks)
   if (!isAuthenticated) {
     router.push("/login");
     return null;
   }
 
-  useEffect(() => {
-    loadSecurityData();
-  }, []);
-
   const loadSecurityData = async () => {
     setLoading(true);
     try {
-      // Load security logs
-      const logsResponse = await fetch("/api/audit-logs", {
-        method: "GET",
-        credentials: "include", // Use session cookies
-      });
+      // Only load security logs if user is admin
+      if (user?.role === "ADMIN") {
+        // Load security logs
+        const logsResponse = await fetch("/api/audit-logs", {
+          method: "GET",
+          credentials: "include", // Use session cookies
+        });
 
-      if (logsResponse.ok) {
-        const logsResult = await logsResponse.json();
-        if (
-          logsResult.success &&
-          logsResult.data &&
-          logsResult.data.recentActivity
-        ) {
-          setSecurityLogs(logsResult.data.recentActivity.slice(0, 10)); // Show latest 10
+        if (logsResponse.ok) {
+          const logsResult = await logsResponse.json();
+          if (
+            logsResult.success &&
+            logsResult.data &&
+            logsResult.data.recentActivity
+          ) {
+            setSecurityLogs(logsResult.data.recentActivity.slice(0, 10)); // Show latest 10
+          }
+        } else if (logsResponse.status === 401) {
+          console.warn(
+            "Unauthorized access to audit logs - admin role required"
+          );
+          setSecurityLogs([]); // Clear logs for non-admin users
         }
+      } else {
+        // Non-admin users don't get access to audit logs
+        setSecurityLogs([]);
       }
 
       // Mock active sessions data (replace with real API call)

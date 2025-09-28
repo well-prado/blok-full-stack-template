@@ -214,7 +214,7 @@ export interface AuthLoginOutput {
     /**
      * User's role
      */
-    role: 'admin' | 'user';
+    role: 'ADMIN' | 'USER';
     /**
      * Whether user's email is verified
      */
@@ -289,7 +289,7 @@ export interface AuthRegisterOutput {
     /**
      * User's role
      */
-    role: 'admin' | 'user';
+    role: 'ADMIN' | 'USER';
     /**
      * Whether user's email is verified
      */
@@ -379,7 +379,7 @@ export interface VerifySessionOutput {
     /**
      * User's role
      */
-    role: 'admin' | 'user';
+    role: 'ADMIN' | 'USER';
     /**
      * Whether user's email is verified
      */
@@ -447,7 +447,7 @@ export interface ProtectedExampleOutput {
     /**
      * User's role
      */
-    role: 'admin' | 'user';
+    role: 'ADMIN' | 'USER';
     /**
      * Whether user's email is verified
      */
@@ -802,7 +802,7 @@ export interface ProfileUpdateOutput {
     /**
      * User's role
      */
-    role: 'admin' | 'user';
+    role: 'ADMIN' | 'USER';
     /**
      * Whether user's email is verified
      */
@@ -1535,7 +1535,7 @@ export interface UserUpdateOutput {
     /**
      * User's role
      */
-    role: 'admin' | 'user';
+    role: 'ADMIN' | 'USER';
     /**
      * Whether user's email is verified
      */
@@ -1601,7 +1601,7 @@ export interface UserDeleteOutput {
     /**
      * User's role
      */
-    role: 'admin' | 'user';
+    role: 'ADMIN' | 'USER';
     /**
      * Deletion timestamp
      */
@@ -1686,7 +1686,7 @@ export interface UserListTestOutput {
     /**
      * User's role
      */
-    role: 'admin' | 'user';
+    role: 'ADMIN' | 'USER';
     /**
      * Whether user's email is verified
      */
@@ -1778,7 +1778,7 @@ export interface UserFindTestOutput {
     /**
      * User's role
      */
-    role: 'admin' | 'user';
+    role: 'ADMIN' | 'USER';
     /**
      * Whether user's email is verified
      */

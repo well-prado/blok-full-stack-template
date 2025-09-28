@@ -17,14 +17,14 @@ export interface RegisterRequest {
   email: string;
   password: string;
   name: string;
-  role?: 'admin' | 'user';
+  role?: 'ADMIN' | 'USER';
 }
 
 export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'user';
+  role: 'ADMIN' | 'USER';
   emailVerified: boolean;
   profileImage?: string;
   preferences?: {

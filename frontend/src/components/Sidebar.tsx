@@ -296,15 +296,15 @@ export function Sidebar({
 
             <div className="flex items-center justify-between">
               <Badge
-                variant={user?.role === "admin" ? "default" : "secondary"}
+                variant={user?.role === "ADMIN" ? "default" : "secondary"}
                 className={cn(
                   "text-xs font-medium",
-                  user?.role === "admin"
+                  user?.role === "ADMIN"
                     ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0"
                     : "bg-white/10 text-muted-foreground border-white/10"
                 )}
               >
-                {user?.role === "admin" && <Shield className="w-3 h-3 mr-1" />}
+                {user?.role === "ADMIN" && <Shield className="w-3 h-3 mr-1" />}
                 {user?.role}
               </Badge>
 

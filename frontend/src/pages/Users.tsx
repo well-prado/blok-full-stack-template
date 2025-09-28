@@ -50,7 +50,14 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import { useCallback, useEffect, useState } from "react";
-import { useWorkflowMutation, useWorkflowQuery } from "../blok-types";
+import {
+  useWorkflowMutation,
+  useWorkflowQuery,
+  type AuthRegisterOutput,
+  type UserUpdateOutput,
+  type UserDeleteOutput,
+  type UserListTestOutput,
+} from "../blok-types";
 
 import { AppLayout } from "../layouts/AppLayout";
 import { Badge } from "../components/ui/badge";
@@ -64,7 +71,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "user";
+  role: "ADMIN" | "USER";
   emailVerified: boolean;
   createdAt: string;
   updatedAt?: string;
@@ -103,7 +110,7 @@ export default function UsersPage() {
     name: "",
     email: "",
     password: "",
-    role: "user" as "admin" | "user",
+    role: "USER" as "ADMIN" | "USER",
   });
 
   // SDK hooks for user operations
@@ -115,15 +122,15 @@ export default function UsersPage() {
       sortBy: "createdAt",
       sortOrder: "desc",
     },
-  });
+  }) as { data?: UserListTestOutput; isLoading: boolean; refetch: () => void };
 
   const createUserMutation = useWorkflowMutation({
     workflowName: "auth-register",
-    onSuccess: (data) => {
+    onSuccess: (data: AuthRegisterOutput) => {
       if (data.success) {
         toast.success("User created successfully");
         setShowAddDialog(false);
-        setFormData({ name: "", email: "", password: "", role: "user" });
+        setFormData({ name: "", email: "", password: "", role: "USER" });
         usersQuery.refetch();
       }
     },
@@ -134,7 +141,7 @@ export default function UsersPage() {
 
   const updateUserMutation = useWorkflowMutation({
     workflowName: "user-update",
-    onSuccess: (data) => {
+    onSuccess: (data: UserUpdateOutput) => {
       if (data.success) {
         toast.success("User updated successfully");
         setShowEditDialog(false);
@@ -149,7 +156,7 @@ export default function UsersPage() {
 
   const deleteUserMutation = useWorkflowMutation({
     workflowName: "user-delete",
-    onSuccess: (data) => {
+    onSuccess: (data: UserDeleteOutput) => {
       if (data.success) {
         toast.success("User deleted successfully");
         setShowDeleteDialog(false);
@@ -171,7 +178,7 @@ export default function UsersPage() {
       // Calculate stats
       const totalUsers = usersQuery.data.users.length;
       const adminUsers = usersQuery.data.users.filter(
-        (u: any) => u.role === "admin"
+        (u: any) => u.role === "ADMIN"
       ).length;
       const activeUsers = usersQuery.data.users.filter(
         (u: any) => u.status === "active"
@@ -261,7 +268,7 @@ export default function UsersPage() {
       };
 
       await updateUserMutation.mutateAsync(updateData);
-      setFormData({ name: "", email: "", password: "", role: "user" });
+      setFormData({ name: "", email: "", password: "", role: "USER" });
     } catch (error: any) {
       console.error("Failed to update user:", error);
       toast.error(error.message || "Failed to update user");
@@ -431,7 +438,7 @@ export default function UsersPage() {
                       <div className="flex gap-2">
                         <Badge
                           variant={
-                            user.role === "admin" ? "default" : "secondary"
+                            user.role === "ADMIN" ? "default" : "secondary"
                           }
                         >
                           <Shield className="h-3 w-3 mr-1" />
@@ -574,9 +581,12 @@ export default function UsersPage() {
               <div className="grid gap-2">
                 <Label htmlFor="role">Role</Label>
                 <Select
-                  value={formData.role}
+                  value={formData.role.toLowerCase()}
                   onValueChange={(value: "admin" | "user") =>
-                    setFormData({ ...formData, role: value })
+                    setFormData({
+                      ...formData,
+                      role: value.toUpperCase() as "ADMIN" | "USER",
+                    })
                   }
                 >
                   <SelectTrigger>
@@ -654,9 +664,12 @@ export default function UsersPage() {
               <div className="grid gap-2">
                 <Label htmlFor="edit-role">Role</Label>
                 <Select
-                  value={formData.role}
+                  value={formData.role.toLowerCase()}
                   onValueChange={(value: "admin" | "user") =>
-                    setFormData({ ...formData, role: value })
+                    setFormData({
+                      ...formData,
+                      role: value.toUpperCase() as "ADMIN" | "USER",
+                    })
                   }
                 >
                   <SelectTrigger>

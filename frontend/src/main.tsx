@@ -70,6 +70,12 @@ const blokConfig = {
   timeout: 30000,
 };
 
+const devOptions = {
+  enableValidation: false,
+  logRequests: false,
+  logErrors: false,
+};
+
 // Prevent multiple root creation during hot reloads
 const rootElement = document.getElementById("root")!;
 let root = (window as any).__reactRoot;

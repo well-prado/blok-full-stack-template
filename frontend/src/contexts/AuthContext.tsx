@@ -2,7 +2,11 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { type User } from "../lib/api";
 import { ErrorHandler } from "../lib/error-handler";
 import { blokRouter } from "../lib/blok-router";
-import { useWorkflowMutation } from "../blok-types";
+import {
+  useWorkflowMutation,
+  type AuthLoginOutput,
+  type AuthRegisterOutput,
+} from "../blok-types";
 
 interface AuthContextType {
   user: User | null;
@@ -25,7 +29,7 @@ function AuthProviderInternal({ children }: { children: React.ReactNode }) {
   // SDK Mutations
   const loginMutation = useWorkflowMutation({
     workflowName: "auth-login",
-    onSuccess: (data) => {
+    onSuccess: (data: AuthLoginOutput) => {
       if (data.success && data.user) {
         const userWithPreferences = data.user as unknown as User;
         setUser(userWithPreferences);
@@ -42,7 +46,7 @@ function AuthProviderInternal({ children }: { children: React.ReactNode }) {
 
   const registerMutation = useWorkflowMutation({
     workflowName: "auth-register",
-    onSuccess: (data) => {
+    onSuccess: (data: AuthRegisterOutput) => {
       if (data.success && data.user) {
         setUser(data.user as unknown as User);
       }
@@ -188,7 +192,7 @@ function AuthProviderInternal({ children }: { children: React.ReactNode }) {
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
-    isAdmin: user?.role === "admin",
+    isAdmin: user?.role === "ADMIN",
     isLoading,
     login,
     register,
