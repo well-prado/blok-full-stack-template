@@ -23,7 +23,7 @@ interface NewSystemLog {
   userAgent: string;
   statusCode: number;
   executionTimeMs?: number;
-  riskLevel: string;
+  riskLevel: LogRiskLevel;
   details?: string;
   changesSummary?: string;
   complianceFlags?: string;
