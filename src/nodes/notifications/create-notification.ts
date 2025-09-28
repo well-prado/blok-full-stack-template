@@ -4,7 +4,7 @@ import { type ParamsDictionary, type JsonLikeObject } from "@nanoservice-ts/runn
 
 import { db } from "../../../database/config";
 
-// Local type definition for notification creation
+// Define interfaces locally since we no longer use Drizzle schemas
 interface CreateNotificationPayload {
   userId: string;
   title: string;
@@ -14,10 +14,10 @@ interface CreateNotificationPayload {
   actionUrl?: string;
   actionLabel?: string;
   category?: string;
-  metadata?: any;
+  expiresAt?: Date;
+  metadata?: string;
   sourceWorkflow?: string;
   sourceNode?: string;
-  expiresAt?: string;
 }
 
 interface CreateNotificationInput {
@@ -203,10 +203,10 @@ export default class CreateNotification extends NanoService<CreateNotificationIn
         actionUrl: inputs.actionUrl?.trim() || undefined,
         actionLabel: inputs.actionLabel?.trim() || undefined,
         category: inputs.category?.trim() || undefined,
-        metadata: inputs.metadata || undefined,
+        metadata: inputs.metadata ? JSON.stringify(inputs.metadata) : undefined,
         sourceWorkflow: inputs.sourceWorkflow?.trim() || undefined,
         sourceNode: inputs.sourceNode?.trim() || undefined,
-        expiresAt: inputs.expiresAt || undefined,
+        expiresAt: inputs.expiresAt ? new Date(inputs.expiresAt) : undefined,
       };
 
       // Insert notification into database

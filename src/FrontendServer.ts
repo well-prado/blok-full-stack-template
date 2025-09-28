@@ -98,7 +98,7 @@ function extractRouteParams(path: string): Record<string, string> {
  * Get dashboard-specific props
  */
 async function getDashboardProps(user: any): Promise<Record<string, any>> {
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || user.role !== 'admin') {
     return { error: 'Unauthorized' };
   }
 
@@ -125,7 +125,7 @@ async function getDashboardProps(user: any): Promise<Record<string, any>> {
  * Get users page props
  */
 async function getUsersProps(user: any, req: express.Request): Promise<Record<string, any>> {
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || user.role !== 'admin') {
     return { error: 'Unauthorized' };
   }
 
@@ -160,7 +160,7 @@ async function getAnalyticsProps(user: any): Promise<Record<string, any>> {
  * Get logs props (admin only)
  */
 async function getLogsProps(user: any): Promise<Record<string, any>> {
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || user.role !== 'admin') {
     return { error: 'Unauthorized. Admin access required for system logs.' };
   }
 
@@ -257,8 +257,8 @@ async function getAuthenticatedUser(req: express.Request): Promise<any | null> {
       return null;
     }
 
-    // Look up the session in the database using Prisma
-    const session = await db.session.findFirst({
+    // Look up the session in the database
+    const sessionResult = await db.session.findFirst({
       where: {
         token: sessionToken,
         expiresAt: {
@@ -266,15 +266,25 @@ async function getAuthenticatedUser(req: express.Request): Promise<any | null> {
         }
       },
       include: {
-        user: true
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            emailVerified: true,
+            profileImage: true,
+            preferences: true
+          }
+        }
       }
     });
 
-    if (!session) {
+    if (!sessionResult) {
       return null;
     }
 
-    const user = session.user;
+    const user = sessionResult.user;
     
     // Parse preferences JSON if it exists
     let preferences = {};
@@ -343,7 +353,7 @@ router.get("*", async (req, res, next) => {
           auth: {
             user: user,
             isAuthenticated: !!user,
-            isAdmin: user?.role === 'ADMIN',
+            isAdmin: user?.role === 'admin',
           },
           url: req.originalUrl,
           version: generatePageVersion(),

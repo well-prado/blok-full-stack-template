@@ -52,7 +52,7 @@ const step: Step = Workflow({
   conditions: () => {
     return [
       // Check if user is authenticated and is an admin
-      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "admin"')
+      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "ADMIN"')
         .addStep({
           name: "manage-roles",
           node: "user-role-manager",

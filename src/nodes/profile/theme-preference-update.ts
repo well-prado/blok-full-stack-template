@@ -108,7 +108,7 @@ export default class ThemePreferenceUpdate extends NanoService<ThemePreferenceUp
     const response = new NanoServiceResponse();
 
     try {
-      // Import database config
+      // Import Prisma database client
       const { db } = await import("../../../database/config");
 
       // Get current user preferences

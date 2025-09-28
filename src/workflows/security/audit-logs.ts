@@ -44,7 +44,7 @@ const step: Step = Workflow({
   conditions: () => {
     return [
       // Only admins can access audit logs
-      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "admin"')
+      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "ADMIN"')
         .addStep({
           name: "query-audit-logs",
           node: "audit-logger",

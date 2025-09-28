@@ -6,62 +6,7 @@ import {
 } from "@nanoservice-ts/runner";
 import { type Context } from "@nanoservice-ts/shared";
 import { db } from "../../../../database/config";
-// Local type definitions
-enum ActionType {
-  CREATE = 'CREATE',
-  READ = 'READ',
-  UPDATE = 'UPDATE',
-  DELETE = 'DELETE',
-  BULK_UPDATE = 'BULK_UPDATE',
-  BULK_DELETE = 'BULK_DELETE',
-  LOGIN = 'LOGIN',
-  LOGOUT = 'LOGOUT',
-  REGISTER = 'REGISTER',
-  RESET_PASSWORD = 'RESET_PASSWORD',
-  VERIFY_EMAIL = 'VERIFY_EMAIL',
-  CHANGE_PASSWORD = 'CHANGE_PASSWORD',
-  UPDATE_PROFILE = 'UPDATE_PROFILE',
-  UPLOAD_FILE = 'UPLOAD_FILE',
-  DELETE_FILE = 'DELETE_FILE',
-  EXPORT_DATA = 'EXPORT_DATA',
-  IMPORT_DATA = 'IMPORT_DATA',
-  BACKUP = 'BACKUP',
-  RESTORE = 'RESTORE',
-  SYSTEM_CONFIG = 'SYSTEM_CONFIG',
-  SECURITY_SCAN = 'SECURITY_SCAN',
-  AUDIT_LOG = 'AUDIT_LOG',
-  OTHER = 'OTHER'
-}
-
-enum LogRiskLevel {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
-}
-
-enum ResourceType {
-  USER = 'USER',
-  PROFILE = 'PROFILE',
-  SETTINGS = 'SETTINGS',
-  ROLE = 'ROLE',
-  SESSION = 'SESSION',
-  NOTIFICATION = 'NOTIFICATION',
-  FILE = 'FILE',
-  SYSTEM = 'SYSTEM',
-  DATABASE = 'DATABASE',
-  API = 'API',
-  WORKFLOW = 'WORKFLOW',
-  NODE = 'NODE',
-  LOG = 'LOG',
-  BACKUP = 'BACKUP',
-  CONFIG = 'CONFIG',
-  SECURITY = 'SECURITY',
-  AUDIT = 'AUDIT',
-  AUTH = 'AUTH',
-  OTHER = 'OTHER'
-}
-
+// Define interfaces and enums locally since we no longer use Drizzle schemas
 interface NewSystemLog {
   userId: string;
   userEmail: string;
@@ -76,16 +21,55 @@ interface NewSystemLog {
   endpoint: string;
   ipAddress: string;
   userAgent: string;
+  statusCode: number;
+  executionTimeMs?: number;
+  riskLevel: string;
+  details?: string;
+  changesSummary?: string;
+  complianceFlags?: string;
+  sourceWorkflow?: string;
+  sourceNode?: string;
   workflowName?: string;
   nodeName?: string;
-  executionTimeMs?: number;
-  statusCode: number;
-  success: boolean;
-  riskLevel: LogRiskLevel;
-  complianceFlags?: string;
-  changesSummary?: string;
+  success?: boolean;
+  errorMessage?: string;
   sessionId?: string;
+  requestSize?: number;
   affectedUsersCount?: number;
+}
+
+enum ActionType {
+  CREATE = 'CREATE',
+  READ = 'READ',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+  LOGIN = 'LOGIN',
+  LOGOUT = 'LOGOUT',
+  EXPORT = 'EXPORT',
+  IMPORT = 'IMPORT',
+  BACKUP = 'BACKUP',
+  RESTORE = 'RESTORE'
+}
+
+enum LogRiskLevel {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL'
+}
+
+enum ResourceType {
+  USER = 'USER',
+  SESSION = 'SESSION',
+  NOTIFICATION = 'NOTIFICATION',
+  AUDIT_LOG = 'AUDIT_LOG',
+  SYSTEM_LOG = 'SYSTEM_LOG',
+  PROFILE = 'PROFILE',
+  SETTINGS = 'SETTINGS',
+  ROLE = 'ROLE',
+  AUTH = 'AUTH',
+  SECURITY = 'SECURITY',
+  SYSTEM = 'SYSTEM'
 }
 
 interface InputType {
@@ -102,6 +86,7 @@ interface InputType {
   httpMethod?: string;
   endpoint?: string;
   requestBody?: Record<string, any>;
+  action?: string;
   
   // Workflow context
   workflowName?: string;
@@ -330,9 +315,9 @@ export default class RequestInterceptor extends NanoService<InputType> {
         userEmail: contextData.userEmail,
         userName: contextData.userName,
         userRole: contextData.userRole,
-        action: (inputs.actionType || this.inferActionType(contextData.httpMethod)).toString(),
-        actionType: (inputs.actionType || this.inferActionType(contextData.httpMethod)).toString(),
-        resourceType: (inputs.resourceType || this.inferResourceType(contextData.endpoint)).toString(),
+        action: inputs.action || `${contextData.httpMethod} ${contextData.endpoint}`,
+        actionType: inputs.actionType || this.inferActionType(contextData.httpMethod),
+        resourceType: inputs.resourceType || this.inferResourceType(contextData.endpoint),
         resourceId: inputs.resourceId || this.extractResourceId(contextData.endpoint, contextData.requestBody),
         resourceName: inputs.resourceName || this.extractResourceName(contextData.requestBody, contextData.responseData),
         httpMethod: contextData.httpMethod,
@@ -341,13 +326,14 @@ export default class RequestInterceptor extends NanoService<InputType> {
         nodeName: contextData.nodeName,
         statusCode: contextData.statusCode,
         success: contextData.success,
+        errorMessage: contextData.errorMessage || null,
         executionTimeMs: ctx.vars?.requestStartTime ? 
           Date.now() - (ctx.vars.requestStartTime as unknown as number) : undefined,
         changesSummary: this.extractChangesSummary(contextData.requestBody, contextData.responseData) ? 
           JSON.stringify(this.extractChangesSummary(contextData.requestBody, contextData.responseData)) : undefined,
         ipAddress: contextData.ipAddress,
-        userAgent: contextData.userAgent || '',
-        sessionId: contextData.sessionId || undefined,
+        userAgent: contextData.userAgent || null,
+        sessionId: contextData.sessionId || null,
         affectedUsersCount: this.countAffectedUsers(contextData.requestBody, contextData.responseData) || 0,
         complianceFlags: JSON.stringify(['audit_trail', 'blame_tracking', 'enterprise_logging']),
         riskLevel: inputs.riskLevel || this.assessRiskLevel(contextData)

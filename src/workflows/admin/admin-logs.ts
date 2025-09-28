@@ -63,7 +63,7 @@ const step: Step = Workflow({
   conditions: () => {
     return [
       // Admin GET request - Query logs with URL parameters
-      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "admin" && ctx.request.method.toLowerCase() === "get"')
+      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "ADMIN" && ctx.request.method.toLowerCase() === "get"')
         .addStep({
           name: "query-system-logs-get",
           node: "system-action-logger",
@@ -84,7 +84,7 @@ const step: Step = Workflow({
         .build(),
 
       // Admin POST request with query action
-      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "admin" && ctx.request.method.toLowerCase() === "post" && (ctx.request.body.action === "query" || !ctx.request.body.action)')
+      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "ADMIN" && ctx.request.method.toLowerCase() === "post" && (ctx.request.body.action === "query" || !ctx.request.body.action)')
         .addStep({
           name: "query-system-logs-post",
           node: "system-action-logger",
@@ -104,7 +104,7 @@ const step: Step = Workflow({
         .build(),
 
       // Admin POST request with getStats action
-      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "admin" && ctx.request.method.toLowerCase() === "post" && ctx.request.body.action === "getStats"')
+      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "ADMIN" && ctx.request.method.toLowerCase() === "post" && ctx.request.body.action === "getStats"')
         .addStep({
           name: "get-system-log-stats",
           node: "system-action-logger",
@@ -117,7 +117,7 @@ const step: Step = Workflow({
         .build(),
 
       // Admin POST request with export action
-      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "admin" && ctx.request.method.toLowerCase() === "post" && ctx.request.body.action === "export"')
+      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "ADMIN" && ctx.request.method.toLowerCase() === "post" && ctx.request.body.action === "export"')
         .addStep({
           name: "export-system-logs",
           node: "system-action-logger",
@@ -138,7 +138,7 @@ const step: Step = Workflow({
         .build(),
 
       // Admin POST request with cleanup action
-      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "admin" && ctx.request.method.toLowerCase() === "post" && ctx.request.body.action === "cleanup"')
+      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "ADMIN" && ctx.request.method.toLowerCase() === "post" && ctx.request.body.action === "cleanup"')
         .addStep({
           name: "cleanup-system-logs",
           node: "system-action-logger",
@@ -150,7 +150,7 @@ const step: Step = Workflow({
         .build(),
 
       // Invalid action for admin POST request
-      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "admin" && ctx.request.method.toLowerCase() === "post" && ctx.request.body.action && !["query", "getStats", "export", "cleanup"].includes(ctx.request.body.action)')
+      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "ADMIN" && ctx.request.method.toLowerCase() === "post" && ctx.request.body.action && !["query", "getStats", "export", "cleanup"].includes(ctx.request.body.action)')
         .addStep({
           name: "invalid-action-error",
           node: "error",
@@ -163,7 +163,7 @@ const step: Step = Workflow({
         .build(),
 
       // Unsupported HTTP method for admin
-      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "admin" && !["get", "post"].includes(ctx.request.method.toLowerCase())')
+      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser.role === "ADMIN" && !["get", "post"].includes(ctx.request.method.toLowerCase())')
         .addStep({
           name: "method-not-allowed",
           node: "error",

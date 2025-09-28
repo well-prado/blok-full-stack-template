@@ -32,7 +32,7 @@ const step: Step = Workflow({
   conditions: () => {
     return [
       // If authenticated and admin, show dashboard
-      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser?.role === "admin"')
+      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser?.role === "ADMIN"')
         .addStep({
           name: "get-user-stats",
           node: "user-list",
@@ -78,7 +78,7 @@ const step: Step = Workflow({
         .build(),
 
       // If authenticated but not admin
-      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser?.role !== "admin"')
+      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser?.role !== "ADMIN"')
         .addStep({
           name: "forbidden",
           node: "error",

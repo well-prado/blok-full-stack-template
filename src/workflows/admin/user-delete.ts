@@ -45,7 +45,7 @@ const step: Step = Workflow({
   conditions: () => {
     return [
       // If authenticated and admin, delete user
-      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser?.role === "admin"')
+      new AddIf('ctx.vars.isAuthenticated === true && ctx.vars.currentUser?.role === "ADMIN"')
         .addStep({
           name: "delete-user",
           node: "user-delete",
