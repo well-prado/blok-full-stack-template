@@ -1,6 +1,104 @@
 import { AddElse, AddIf, type Step, Workflow } from "@nanoservice-ts/helper";
 
 /**
+ * Admin Logs Input Type
+ * 
+ * Defines all possible input parameters for the admin logs workflow.
+ * These types are automatically enforced in useWorkflowQuery/Mutation.
+ */
+export interface AdminLogsInput {
+  // Pagination
+  page?: number;
+  limit?: number;
+  offset?: number;
+  
+  // Sorting
+  sortBy?: 'createdAt' | 'actionType' | 'resourceType' | 'riskLevel' | 'userId';
+  sortOrder?: 'asc' | 'desc';
+  
+  // Filters
+  search?: string;
+  searchQuery?: string;
+  filterUserId?: string;
+  filterActionType?: 'CREATE' | 'UPDATE' | 'DELETE' | 'BULK_UPDATE' | 'BULK_DELETE' | 'READ';
+  filterResourceType?: 'user' | 'profile' | 'settings' | 'role' | 'auth' | 'security' | 'system';
+  filterRiskLevel?: 'low' | 'medium' | 'high' | 'critical';
+  filterSuccess?: string | boolean;
+  
+  // Date range
+  dateRange?: {
+    start?: string;
+    end?: string;
+    from?: string | null;
+    to?: string | null;
+  };
+  
+  // Actions
+  action?: 'query' | 'getStats' | 'export' | 'cleanup';
+  exportFormat?: 'json' | 'csv';
+}
+
+/**
+ * Admin Logs Output Type
+ * 
+ * Defines the response structure for the admin logs workflow.
+ * Includes system logs with comprehensive metadata for accountability.
+ */
+export interface AdminLogsOutput {
+  success: boolean;
+  data?: {
+    logs: Array<{
+      id: string;
+      userId: string;
+      userEmail: string;
+      userName: string;
+      userRole: string;
+      actionType: string;
+      resourceType: string;
+      resourceId?: string | null;
+      resourceName?: string | null;
+      httpMethod: string;
+      endpoint: string;
+      workflowName?: string | null;
+      nodeName?: string | null;
+      createdAt: string;
+      statusCode: number;
+      success: boolean;
+      errorMessage?: string | null;
+      executionTimeMs?: number | null;
+      requestSize?: number | null;
+      changesSummary?: Record<string, any> | null;
+      ipAddress: string;
+      userAgent?: string | null;
+      sessionId?: string | null;
+      affectedUsersCount?: number | null;
+      complianceFlags?: string[] | null;
+      riskLevel: string;
+    }>;
+    total: number;
+    page?: number;
+    limit?: number;
+    offset?: number;
+    hasMore?: boolean;
+    // For stats action
+    stats?: {
+      totalLogs: number;
+      todayLogs: number;
+      failedActions: number;
+      highRiskActions: number;
+    };
+    // For export action
+    csvData?: string;
+    totalRecords?: number;
+  };
+  error?: {
+    message: string;
+    code?: number;
+  };
+  message?: string;
+}
+
+/**
  * Admin Logs Workflow
  * 
  * Enterprise admin-only system logs management workflow.
