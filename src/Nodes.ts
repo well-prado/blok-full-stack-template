@@ -2,6 +2,7 @@ import AdminDashboardNodes from '@well-prado/blok-admin-dashboard/dist/src/Nodes
 import ApiCall from "@nanoservice-ts/api-call";
 import ApiNodes from './nodes/api';
 import DatabaseNodes from './nodes/database';
+import EmailNodes from './nodes/email';
 import IfElse from "@nanoservice-ts/if-else";
 import type { NodeBase } from "@nanoservice-ts/shared";
 
@@ -16,6 +17,9 @@ const nodes: {
   
   // Database Nodes (includes mongo-query)
   ...DatabaseNodes,
+  
+  // Email Nodes
+  ...EmailNodes,
   
   // Admin Dashboard Nodes
   ...AdminDashboardNodes,

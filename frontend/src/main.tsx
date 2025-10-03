@@ -1,8 +1,8 @@
 import "./globals.css";
 
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { Suspense } from "react";
-import ReactDOM from "react-dom/client";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 // Core providers and components (keep these as static imports)
 import { AnimationProvider } from "./contexts/AnimationContext";
@@ -13,6 +13,7 @@ import { BlokProvider } from "@well-prado/blok-react-sdk";
 import { ErrorHandler } from "./lib/error-handler";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import ReactDOM from "react-dom/client";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Toaster } from "./components/ui/sonner";
 
@@ -63,17 +64,22 @@ window.fetch = async (...args) => {
   }
 };
 
+// React Query Client Configuration
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
+
 // Blok SDK Configuration
 const blokConfig = {
   baseUrl: "http://localhost:4000",
   credentials: "include" as const,
   timeout: 30000,
-};
-
-const devOptions = {
-  enableValidation: false,
-  logRequests: false,
-  logErrors: false,
 };
 
 // Prevent multiple root creation during hot reloads
@@ -87,128 +93,130 @@ if (!root) {
 
 root.render(
   <React.StrictMode>
-    <BlokProvider config={blokConfig}>
-      <AuthProvider>
-        <ThemeProvider>
-          <AnimationProvider>
-            <NotificationProvider>
-              <BlokNavigationProvider>
-                <Router
-                  future={{
-                    v7_startTransition: true,
-                    v7_relativeSplatPath: true,
-                  }}
-                >
-                  <BlokPageRenderer>
-                    <Suspense fallback={<PageLoader />}>
-                      <Routes>
-                        {/* Public routes */}
-                        <Route path="/" element={<HomePage />} />
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/register" element={<RegisterPage />} />
+    <QueryClientProvider client={queryClient}>
+      <BlokProvider config={blokConfig}>
+        <AuthProvider>
+          <ThemeProvider>
+            <AnimationProvider>
+              <NotificationProvider>
+                <BlokNavigationProvider>
+                  <Router
+                    future={{
+                      v7_startTransition: true,
+                      v7_relativeSplatPath: true,
+                    }}
+                  >
+                    <BlokPageRenderer>
+                      <Suspense fallback={<PageLoader />}>
+                        <Routes>
+                          {/* Public routes */}
+                          <Route path="/" element={<HomePage />} />
+                          <Route path="/login" element={<LoginPage />} />
+                          <Route path="/register" element={<RegisterPage />} />
 
-                        {/* Protected routes - require authentication */}
-                        <Route
-                          path="/dashboard"
-                          element={
-                            <ProtectedRoute>
-                              <DashboardPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/profile"
-                          element={
-                            <ProtectedRoute>
-                              <ProfilePage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/security"
-                          element={
-                            <ProtectedRoute>
-                              <SecurityPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/themes"
-                          element={
-                            <ProtectedRoute>
-                              <ThemesPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/settings"
-                          element={
-                            <ProtectedRoute>
-                              <SettingsPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/help"
-                          element={
-                            <ProtectedRoute>
-                              <HelpPage />
-                            </ProtectedRoute>
-                          }
-                        />
+                          {/* Protected routes - require authentication */}
+                          <Route
+                            path="/dashboard"
+                            element={
+                              <ProtectedRoute>
+                                <DashboardPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/profile"
+                            element={
+                              <ProtectedRoute>
+                                <ProfilePage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/security"
+                            element={
+                              <ProtectedRoute>
+                                <SecurityPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/themes"
+                            element={
+                              <ProtectedRoute>
+                                <ThemesPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/settings"
+                            element={
+                              <ProtectedRoute>
+                                <SettingsPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/help"
+                            element={
+                              <ProtectedRoute>
+                                <HelpPage />
+                              </ProtectedRoute>
+                            }
+                          />
 
-                        {/* Admin-only routes */}
-                        <Route
-                          path="/analytics"
-                          element={
-                            <ProtectedRoute requireAdmin>
-                              <AnalyticsPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/users"
-                          element={
-                            <ProtectedRoute requireAdmin>
-                              <UsersPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/system"
-                          element={
-                            <ProtectedRoute requireAdmin>
-                              <SystemPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/logs"
-                          element={
-                            <ProtectedRoute requireAdmin>
-                              <div>Admin Logs temporarily unavailable</div>
-                            </ProtectedRoute>
-                          }
-                        />
+                          {/* Admin-only routes */}
+                          <Route
+                            path="/analytics"
+                            element={
+                              <ProtectedRoute requireAdmin>
+                                <AnalyticsPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/users"
+                            element={
+                              <ProtectedRoute requireAdmin>
+                                <UsersPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/system"
+                            element={
+                              <ProtectedRoute requireAdmin>
+                                <SystemPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/logs"
+                            element={
+                              <ProtectedRoute requireAdmin>
+                                <div>Admin Logs temporarily unavailable</div>
+                              </ProtectedRoute>
+                            }
+                          />
 
-                        {/* Development/Testing routes - Public access */}
-                        <Route
-                          path="/navigation-test"
-                          element={<NavigationTestPage />}
-                        />
+                          {/* Development/Testing routes - Public access */}
+                          <Route
+                            path="/navigation-test"
+                            element={<NavigationTestPage />}
+                          />
 
-                        {/* Catch-all route for 404 pages */}
-                        <Route path="*" element={<NotFoundPage />} />
-                      </Routes>
-                    </Suspense>
-                  </BlokPageRenderer>
-                </Router>
-                <Toaster />
-              </BlokNavigationProvider>
-            </NotificationProvider>
-          </AnimationProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    </BlokProvider>
+                          {/* Catch-all route for 404 pages */}
+                          <Route path="*" element={<NotFoundPage />} />
+                        </Routes>
+                      </Suspense>
+                    </BlokPageRenderer>
+                  </Router>
+                  <Toaster />
+                </BlokNavigationProvider>
+              </NotificationProvider>
+            </AnimationProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </BlokProvider>
+    </QueryClientProvider>
   </React.StrictMode>
 );

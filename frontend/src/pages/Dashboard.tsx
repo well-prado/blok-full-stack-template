@@ -1,5 +1,5 @@
 import { Activity, Shield, TrendingUp, Users } from "lucide-react";
-import React, { useEffect, useState, Suspense } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 
 import type { AdminDashboard } from "../lib/api";
 import { AppLayout } from "../layouts/AppLayout";
@@ -11,7 +11,11 @@ import { useAuth } from "../contexts/AuthContext";
 import { useWorkflowQuery } from "../blok-types";
 
 // Lazy load the ChartSection to avoid loading recharts in the main bundle
-const ChartSection = React.lazy(() => import("../components/ChartSection").then(module => ({ default: module.ChartSection })));
+const ChartSection = React.lazy(() =>
+  import("../components/ChartSection").then((module) => ({
+    default: module.ChartSection,
+  }))
+);
 
 // Loading component for charts
 const ChartLoader = () => (
@@ -31,7 +35,7 @@ export default function DashboardPage() {
 
   // SDK hook for dashboard data
   const dashboardQuery = useWorkflowQuery({
-    workflowName: "admin-dashboard",
+    workflowKey: "admin-dashboard",
     input: {},
     enabled: isAdmin, // Only fetch when user is admin
   });

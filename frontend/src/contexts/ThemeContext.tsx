@@ -389,7 +389,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // SDK hook for theme preferences
   const themePreferencesMutation = useWorkflowMutation({
-    workflowName: "theme-preferences",
+    workflowKey: "theme-preferences",
     onError: (error) => {
       console.warn("Failed to save theme preferences to database:", error);
     },

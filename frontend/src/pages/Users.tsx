@@ -115,7 +115,7 @@ export default function UsersPage() {
 
   // SDK hooks for user operations
   const usersQuery = useWorkflowQuery({
-    workflowName: "user-list-test",
+    workflowKey: "user-list-test",
     input: {
       page: 1,
       limit: 100,
@@ -125,7 +125,7 @@ export default function UsersPage() {
   }) as { data?: UserListTestOutput; isLoading: boolean; refetch: () => void };
 
   const createUserMutation = useWorkflowMutation({
-    workflowName: "auth-register",
+    workflowKey: "auth-register",
     onSuccess: (data: AuthRegisterOutput) => {
       if (data.success) {
         toast.success("User created successfully");
@@ -140,7 +140,7 @@ export default function UsersPage() {
   });
 
   const updateUserMutation = useWorkflowMutation({
-    workflowName: "user-update",
+    workflowKey: "user-update",
     onSuccess: (data: UserUpdateOutput) => {
       if (data.success) {
         toast.success("User updated successfully");
@@ -155,7 +155,7 @@ export default function UsersPage() {
   });
 
   const deleteUserMutation = useWorkflowMutation({
-    workflowName: "user-delete",
+    workflowKey: "user-delete",
     onSuccess: (data: UserDeleteOutput) => {
       if (data.success) {
         toast.success("User deleted successfully");

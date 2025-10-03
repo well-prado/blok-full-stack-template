@@ -59,7 +59,7 @@ export default function ProfilePage() {
 
   // SDK hooks for profile operations
   const profileImageUploadMutation = useWorkflowMutation({
-    workflowName: "profile-image-upload",
+    workflowKey: "profile-image-upload",
     onSuccess: (data) => {
       if (data.success) {
         toast.success("Profile image updated successfully!");
@@ -73,7 +73,7 @@ export default function ProfilePage() {
   });
 
   const profileUpdateMutation = useWorkflowMutation({
-    workflowName: "profile-update",
+    workflowKey: "profile-update",
     onSuccess: (data) => {
       if (data.success) {
         toast.success("Profile updated successfully!");

@@ -80,7 +80,7 @@ export function NotificationProvider({
 
   // SDK hooks for notification operations
   const notificationsQuery = useWorkflowQuery({
-    workflowName: "user-notifications",
+    workflowKey: "user-notifications",
     input: {
       userId: "current", // The backend should handle current user context
       unreadOnly: false,
@@ -91,7 +91,7 @@ export function NotificationProvider({
   });
 
   const markNotificationMutation = useWorkflowMutation({
-    workflowName: "mark-notification-read",
+    workflowKey: "mark-notification-read",
     onSuccess: () => {
       // Refetch notifications to get updated state
       notificationsQuery.refetch();
@@ -102,7 +102,7 @@ export function NotificationProvider({
   });
 
   const clearAllMutation = useWorkflowMutation({
-    workflowName: "clear-all-notifications",
+    workflowKey: "clear-all-notifications",
     onSuccess: () => {
       // Refetch notifications to get updated state
       notificationsQuery.refetch();

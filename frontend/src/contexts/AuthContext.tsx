@@ -28,7 +28,7 @@ function AuthProviderInternal({ children }: { children: React.ReactNode }) {
 
   // SDK Mutations
   const loginMutation = useWorkflowMutation({
-    workflowName: "auth-login",
+    workflowKey: "auth-login",
     onSuccess: (data: AuthLoginOutput) => {
       if (data.success && data.user) {
         const userWithPreferences = data.user as unknown as User;
@@ -45,7 +45,7 @@ function AuthProviderInternal({ children }: { children: React.ReactNode }) {
   });
 
   const registerMutation = useWorkflowMutation({
-    workflowName: "auth-register",
+    workflowKey: "auth-register",
     onSuccess: (data: AuthRegisterOutput) => {
       if (data.success && data.user) {
         setUser(data.user as unknown as User);
@@ -57,7 +57,7 @@ function AuthProviderInternal({ children }: { children: React.ReactNode }) {
   });
 
   const logoutMutation = useWorkflowMutation({
-    workflowName: "auth-logout" as any, // Use auth-logout workflow (not in types due to auth requirements)
+    workflowKey: "auth-logout", // Use auth-logout workflow
     onSuccess: () => {
       // Clear user state immediately
       setUser(null);

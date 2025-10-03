@@ -35,17 +35,19 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     target: 'es2020',
-    // Increase warning limit temporarily while we optimize
-    chunkSizeWarningLimit: 600, // Lower this to see what's actually large
+    chunkSizeWarningLimit: 1000, // Increased to avoid warnings for vendor chunks
     rollupOptions: {
       output: {
         // Aggressive chunking strategy to force code splitting
         manualChunks: (id) => {
           // First check if it's a node_modules dependency
           if (id.includes('node_modules')) {
-            // React ecosystem - keep React and React-DOM together for better caching
-            if (id.includes('react') && !id.includes('react-router') && !id.includes('react-hook-form')) {
-              return 'react-core';
+            // Split React core into separate chunks for better caching
+            if (id.includes('/react-dom/')) {
+              return 'react-dom';
+            }
+            if (id.includes('/react/') && !id.includes('react-router') && !id.includes('react-hook-form')) {
+              return 'react';
             }
             
             // React Router - separate chunk

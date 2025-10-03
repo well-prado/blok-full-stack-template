@@ -375,16 +375,7 @@
     background: rgba(255, 255, 255, 0.12) !important;
   }
 
-  /* Override Shadcn Select Item hover/focus states */
-  .hover\\:bg-accent\\/50:hover,
-  .focus\\:bg-accent:focus {
-    background: rgba(0, 0, 0, 0.06) !important;
-  }
-
-  .dark .hover\\:bg-accent\\/50:hover,
-  .dark .focus\\:bg-accent:focus {
-    background: rgba(255, 255, 255, 0.1) !important;
-  }
+  /* Select item hover/focus states handled via Tailwind utilities in component */
 
   /* Smooth transitions only - no movement animations */
 
