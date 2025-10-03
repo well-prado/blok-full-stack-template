@@ -18,7 +18,7 @@
     "blok:validate": "blok-codegen validate --url http://localhost:4000"
   },
   "dependencies": {
-    "@well-prado/blok-typed-sdk": "^1.0.0",
+    "@well-prado/blok-typed-sdk": "^1.0.1",
     "@well-prado/blok-front-sdk-core": "^1.0.2",
     "@formkit/auto-animate": "^0.9.0",
     "@radix-ui/react-accordion": "^1.1.2",
