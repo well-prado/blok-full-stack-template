@@ -2,6 +2,232 @@
 
 Complete Blok full-stack application with authentication, admin dashboard, and React frontend.
 
+---
+
+## 🚀 Quick Start with Blok CLI
+
+### Creating a New Project
+
+Create a new Blok full-stack application in seconds:
+
+```bash
+npx @well-prado/create-blok-fullstack@latest my-awesome-app
+```
+
+Or use a specific version:
+
+```bash
+npx @well-prado/create-blok-fullstack@2.3.2 my-project
+```
+
+### Available CLI Commands
+
+#### 1. **Create Project**
+```bash
+npx @well-prado/create-blok-fullstack@latest <project-name>
+```
+
+**What it does:**
+- ✅ Creates a new directory with your project name
+- ✅ Clones the latest Blok full-stack template
+- ✅ Installs all backend dependencies (Node.js packages)
+- ✅ Installs all frontend dependencies (React, TypeScript, etc.)
+- ✅ Sets up Prisma database with migrations
+- ✅ Configures your development environment
+- ✅ Creates a production-ready application structure
+
+**Arguments:**
+- `<project-name>` - Name of your project (required)
+
+**Example:**
+```bash
+npx @well-prado/create-blok-fullstack@latest ecommerce-platform
+cd ecommerce-platform
+npm run dev
+```
+
+#### 2. **Development Mode**
+```bash
+npm run dev
+```
+
+**What it does:**
+- 🔥 Starts both backend server (port 4000) and frontend dev server (port 5173)
+- 🔄 Enables hot module replacement (HMR) for instant updates
+- 🎯 Watches for file changes and auto-restarts
+- 📊 Displays logs from both servers in your terminal
+
+**When to use:** Daily development, building features, testing changes
+
+#### 3. **Start Backend Only**
+```bash
+npm run dev:backend
+```
+
+**What it does:**
+- 🎯 Starts only the Blok backend server on port 4000
+- 🔄 Watches for changes in `src/` directory
+- 📡 API endpoints available at `http://localhost:4000/api/*`
+
+**When to use:** Working on backend workflows, testing APIs, debugging nodes
+
+#### 4. **Start Frontend Only**
+```bash
+npm run dev:frontend
+```
+
+**What it does:**
+- ⚡ Starts only the Vite dev server on port 5173
+- 🎨 Hot reload for React components and styles
+- 🔍 Source maps for debugging
+
+**When to use:** Working on UI/UX, styling, frontend components
+
+#### 5. **Generate TypeScript Types**
+```bash
+cd frontend && npm run blok:codegen
+```
+
+**What it does:**
+- 🔮 Analyzes all your backend workflows
+- 📝 Generates TypeScript types for each workflow
+- 🎣 Creates type-safe React hooks (`useWorkflow`, `useWorkflowQuery`, `useWorkflowMutation`)
+- 💡 Enables autocomplete in your IDE
+
+**When to use:** 
+- After creating new workflows
+- After modifying workflow inputs/outputs
+- Before starting frontend development
+
+**Example:**
+```typescript
+// Automatically generated and fully typed!
+import { useAuthLoginMutation } from '@/blok-types';
+
+const { mutate: login } = useAuthLoginMutation();
+
+login({ 
+  email: 'admin@example.com',
+  password: 'admin123' 
+  // ✅ TypeScript will autocomplete and validate!
+});
+```
+
+#### 6. **Build for Production**
+```bash
+npm run build:all
+```
+
+**What it does:**
+- 🏗️ Compiles TypeScript backend to optimized JavaScript
+- 📦 Bundles frontend with Vite (optimized, minified)
+- 🎨 Processes Tailwind CSS
+- ✅ Type checks entire codebase
+- 📁 Output: `dist/` (backend) and `frontend/dist/` (frontend)
+
+**When to use:** Preparing for deployment, testing production build
+
+#### 7. **Start Production Server**
+```bash
+npm start
+```
+
+**What it does:**
+- 🚀 Runs the compiled production build
+- ⚡ Serves both backend API and frontend assets
+- 🔒 Production optimizations enabled
+
+**Requirements:** Must run `npm run build:all` first
+
+#### 8. **Database Migrations**
+```bash
+npx prisma migrate dev --name <migration-name>
+```
+
+**What it does:**
+- 🗄️ Creates and applies database schema changes
+- 📝 Generates migration files
+- 🔄 Updates Prisma Client types
+
+**Example:**
+```bash
+npx prisma migrate dev --name add_user_preferences
+```
+
+#### 9. **Reset Database**
+```bash
+npx prisma migrate reset
+```
+
+**What it does:**
+- 🗑️ Drops all database tables
+- 🔄 Reapplies all migrations from scratch
+- ⚠️ **WARNING:** Deletes all data!
+
+**When to use:** Development only, when you need a clean database
+
+#### 10. **View Database**
+```bash
+npx prisma studio
+```
+
+**What it does:**
+- 🎨 Opens a web-based database GUI at `http://localhost:5555`
+- 👀 View all tables and data
+- ✏️ Edit records directly
+- 🔍 Browse relationships
+
+---
+
+## 📋 Complete Command Reference
+
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `npx @well-prado/create-blok-fullstack@latest <name>` | Create new project | Starting a new application |
+| `npm run dev` | Development mode (both servers) | Daily development |
+| `npm run dev:backend` | Backend only | Working on APIs/workflows |
+| `npm run dev:frontend` | Frontend only | Working on UI/UX |
+| `cd frontend && npm run blok:codegen` | Generate types | After workflow changes |
+| `npm run build:all` | Build for production | Before deployment |
+| `npm start` | Run production build | Production/staging servers |
+| `npx prisma migrate dev` | Create migration | Database schema changes |
+| `npx prisma migrate reset` | Reset database | Clean slate (dev only) |
+| `npx prisma studio` | Database GUI | Viewing/editing data |
+
+---
+
+## 🎯 Common Workflows
+
+### Starting Your Day
+```bash
+cd your-project
+npm run dev
+# Opens backend at http://localhost:4000
+# Opens frontend at http://localhost:5173
+```
+
+### Adding a New Workflow
+```bash
+# 1. Create your workflow in src/workflows/
+# 2. Regenerate types
+cd frontend && npm run blok:codegen
+
+# 3. Use the new types in your React components!
+```
+
+### Deploying to Production
+```bash
+# 1. Build everything
+npm run build:all
+
+# 2. Test production build locally
+npm start
+
+# 3. Deploy dist/ folders to your server
+```
+
+---
+
 ## 🚀 Features
 
 - **Complete Authentication System** - Login, register, logout, session management
